@@ -4,8 +4,11 @@ PROR_NAME=draw_prog
 
 PROG_DIR=prog
 CORE_DIR=core
+DATA_DIR=data
 
 INC_DIR=inc
+
+SHADERS_TGT_DIR=$DATA_DIR/simple_ogl
 
 PROG_PATH=$PROG_DIR/$PROR_NAME
 
@@ -107,6 +110,10 @@ fi
 OGL_INC_DL=0
 for kh in glext.h glcorearb.h wglext.h; do
 	if [ ! -f $INC_OGL/$kh ]; then
+		if [ $OGL_INC_DL -ne 1 ]; then
+			printf "$FMT_OFF""-> Downloading OpenGL headers...\n"
+			OGL_INC_DL=1
+		fi
 		printf "$FMT_B_GREEN""     $kh""$FMT_OFF\n"
 		curl -o $INC_OGL/$kh $KHR_REG_URL/OpenGL/api/GL/$kh
 	fi
@@ -117,6 +124,10 @@ if [ ! -d $INC_KHR ]; then
 fi
 for kh in khrplatform.h; do
 	if [ ! -f $INC_KHR/$kh ]; then
+		if [ $OGL_INC_DL -ne 1 ]; then
+			printf "$FMT_OFF""-> Downloading OpenGL headers...\n"
+			OGL_INC_DL=1
+		fi
 		printf "$FMT_B_GREEN""     $kh""$FMT_OFF\n"
 		curl -o $INC_KHR/$kh $KHR_REG_URL/EGL/api/KHR/$kh
 	fi
@@ -135,8 +146,11 @@ printf "Compiling \"$FMT_BOLD$FMT_B_MAGENTA$PROG_PATH$FMT_OFF\" with $FMT_BOLD$C
 rm -f $PROG_PATH
 $CXX -std=c++11 -ggdb $DEFS $INCS $SRCS -o $PROG_PATH $LIBS $*
 if [ -f "$PROG_PATH" ]; then
-	printf "$FMT_B_GREEN""Success""$FMT_OFF""$FMT_BOLD""!!""$FMT_OFF"
+	printf "$FMT_B_GREEN""Success""$FMT_OFF""$FMT_BOLD""!!""$FMT_OFF\n"
+	if [ ! -d $SHADERS_TGT_DIR ]; then
+		mkdir -p $SHADERS_TGT_DIR
+	fi
 else
-	printf "$FMT_B_RED""Failure""$FMT_OFF..."
+	printf "$FMT_B_RED""Failure""$FMT_OFF...\n"
 fi
-echo ""
+
