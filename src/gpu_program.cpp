@@ -50,6 +50,11 @@ void GPUProgram::set_vector(const char* pName, const cxVec& v, const float w) co
 	set_gl_v4(pName, tmp);
 }
 
+void GPUProgram::set_vector(const char* pName, const float x, const float y, const float z, const float w) const {
+	float tmp[] = { x, y, z, w };
+	set_gl_v4(pName, tmp);
+}
+
 void GPUProgram::set_color(const char* pName, const cxColor& c) const {
 	float tmp[] = { c.r, c.g, c.b, c.a };
 	set_gl_v4(pName, tmp);

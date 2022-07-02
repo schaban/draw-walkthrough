@@ -15,6 +15,7 @@ public:
 
 	void use();
 	void set_vector(const char* pName, const cxVec& v, const float w = 0.0f) const;
+	void set_vector(const char* pName, const float x, const float y, const float z, const float w) const;
 	void set_color(const char* pName, const cxColor& c) const;
 	void set_matrix(const char* pName, const cxMtx& m) const;
 	void set_transposed_matrix(const char* pName, const cxMtx& m) const;
