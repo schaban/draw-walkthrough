@@ -7,7 +7,9 @@ CORE_DIR=core
 DATA_DIR=data
 
 INC_DIR=inc
+SRC_DIR=src
 
+SHADERS_SRC_DIR=$SRC_DIR/shaders
 SHADERS_TGT_DIR=$DATA_DIR/simple_ogl
 
 PROG_PATH=$PROG_DIR/$PROR_NAME
@@ -134,7 +136,7 @@ for kh in khrplatform.h; do
 done
 
 INCS="-I $CORE_DIR -I $INC_DIR "
-SRCS="`ls src/*.cpp` `ls $CORE_DIR/*.cpp`"
+SRCS="`ls $SRC_DIR/*.cpp` `ls $CORE_DIR/*.cpp`"
 
 DEFS="-DX11"
 LIBS="-lX11 -lpthread"
@@ -146,10 +148,15 @@ printf "Compiling \"$FMT_BOLD$FMT_B_MAGENTA$PROG_PATH$FMT_OFF\" with $FMT_BOLD$C
 rm -f $PROG_PATH
 $CXX -std=c++11 -ggdb $DEFS $INCS $SRCS -o $PROG_PATH $LIBS $*
 if [ -f "$PROG_PATH" ]; then
-	printf "$FMT_B_GREEN""Success""$FMT_OFF""$FMT_BOLD""!!""$FMT_OFF\n"
 	if [ ! -d $SHADERS_TGT_DIR ]; then
 		mkdir -p $SHADERS_TGT_DIR
 	fi
+	printf "$FMT_OFF""Copying GLSL code:\n""$FMT_GRAY"
+	for glsl in symbol.vert symbol.frag batch_static.vert batch_deform.vert batch.frag; do
+		cp -v $SHADERS_SRC_DIR/$glsl $SHADERS_TGT_DIR/$glsl
+	done
+	printf "$FMT_OFF""Done!\n"
+	printf "$FMT_B_GREEN""Success""$FMT_OFF""$FMT_BOLD""!!""$FMT_OFF\n"
 else
 	printf "$FMT_B_RED""Failure""$FMT_OFF...\n"
 fi
