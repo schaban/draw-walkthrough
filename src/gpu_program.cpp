@@ -56,7 +56,7 @@ static bool ck_gl_num_elems(const int numElems) {
 
 void GPUProgram::enable_gl_vertex_input(const char* pName, const int numElems, const size_t stride, const size_t offs) {
 	if (is_valid() && pName && ck_gl_num_elems(numElems) && stride > 0) {
-		GLint loc = glGetAttribLocation(get_id(), "vtx_pos");
+		GLint loc = glGetAttribLocation(get_id(), pName);
 		if (loc >= 0) {
 			glEnableVertexAttribArray(loc);
 			glVertexAttribPointer(loc, numElems, GL_FLOAT, GL_FALSE, (GLsizei)stride, (const void*)offs);
