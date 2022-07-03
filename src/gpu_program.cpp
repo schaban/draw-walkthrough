@@ -3,6 +3,10 @@
 
 #include "gpu_program.hpp"
 
+GPUProgram::GPUProgram() : mId(0) {
+	clear_inputs();
+}
+
 void GPUProgram::init(const GLuint sidVert, const GLuint sidFrag) {
 	if (is_valid()) {
 		nxCore::dbg_msg("GPUProgram: already initialized.\n");
@@ -56,10 +60,16 @@ static bool ck_gl_num_elems(const int numElems) {
 
 void GPUProgram::enable_gl_vertex_input(const char* pName, const int numElems, const size_t stride, const size_t offs) {
 	if (is_valid() && pName && ck_gl_num_elems(numElems) && stride > 0) {
-		GLint loc = glGetAttribLocation(get_id(), pName);
-		if (loc >= 0) {
-			glEnableVertexAttribArray(loc);
-			glVertexAttribPointer(loc, numElems, GL_FLOAT, GL_FALSE, (GLsizei)stride, (const void*)offs);
+		if (mInputCnt < GPUPROG_MAX_VTX_INPUTS) {
+			GLint loc = glGetAttribLocation(get_id(), pName);
+			if (loc >= 0) {
+				glEnableVertexAttribArray(loc);
+				glVertexAttribPointer(loc, numElems, GL_FLOAT, GL_FALSE, (GLsizei)stride, (const void*)offs);
+				mEnabledInputLocs[mInputCnt] = loc;
+				++mInputCnt;
+			}
+		} else {
+			nxCore::dbg_msg("GPUProgram: too many inputs\n");
 		}
 	}
 }
@@ -120,6 +130,31 @@ void GPUProgram::enable_vertex_vec4(const char* pName, const size_t stride, cons
 	enable_gl_vertex_input(pName, 4, stride, offs);
 }
 
+void GPUProgram::clear_inputs() {
+	mInputCnt = 0;
+	for (uint32_t i = 0; i < GPUPROG_MAX_VTX_INPUTS; ++i) {
+		mEnabledInputLocs[i] = 0;
+	}
+}
+
+void GPUProgram::disable_vertex_inputs() {
+	for (uint32_t i = 0; i < mInputCnt; ++i) {
+		glDisableVertexAttribArray(mEnabledInputLocs[i]);
+	}
+	clear_inputs();
+}
+
+void GPUProgram::draw_triangles(const size_t numTris, const size_t idxOrg, const bool idx32) {
+	if (is_valid()) {
+		use();
+		GLsizei cnt = (GLsizei)(numTris * 3);
+		GLenum typ = idx32 ? GL_UNSIGNED_INT : GL_UNSIGNED_SHORT;
+		size_t siz = idx32 ? sizeof(uint32_t) : sizeof(uint16_t);
+		const void* org = reinterpret_cast<const void*>(idxOrg * siz);
+		glDrawElements(GL_TRIANGLES, cnt, typ, org);
+	}
+}
+
 
 namespace GPUProgUtils {
 
@@ -133,15 +168,15 @@ GLuint load_shader(cxResourceManager* pRsrcMgr, const char* pName, const char* p
 		if (pShadersPath) {
 			pathLen += nxCore::str_len(pShadersPath) + 2;
 		} else {
-			pathLen += 1;
+			pathLen += 2;
 		}
 		if (pathLen > sizeof(path)) {
-			pPath = (char*)nxCore::mem_alloc(pathLen);
+			pPath = reinterpret_cast<char*>(nxCore::mem_alloc(pathLen));
 		}
 		if (pPath) {
 			XD_SPRINTF(XD_SPRINTF_BUF(pPath, pathLen), "%s/%s/%s", pDataPath, pShadersPath ? pShadersPath : "", pName);
 			size_t srcSize = 0;
-			char* pSrc = (char*)nxCore::bin_load(path, &srcSize, false, true);
+			char* pSrc = (char*)nxCore::bin_load(pPath, &srcSize, false, true);
 			if (pSrc) {
 				GLenum kind = nxCore::str_ends_with(pName, ".vert") ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER;
 				sid = OGLSys::compile_shader_str(pSrc, srcSize, kind);
