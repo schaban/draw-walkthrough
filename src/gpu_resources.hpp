@@ -15,3 +15,12 @@ namespace GPUModel {
 	void prepare(sxModelData* pMdl);
 	void release(sxModelData* pMdl);
 }
+
+namespace GPUTexture {
+	void prepare(sxTextureData* pTex);
+	void release(sxTextureData* pTex);
+}
+
+namespace GPUResources {
+	void init_manager_ifc(cxResourceManager* pMgr);
+}

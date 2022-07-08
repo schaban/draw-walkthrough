@@ -1,7 +1,7 @@
 #include "crosscore.hpp"
 #include "oglsys.hpp"
 
-#include "gpu_model.hpp"
+#include "gpu_resources.hpp"
 
 namespace GPUModel {
 
@@ -101,4 +101,32 @@ void release(sxModelData* pMdl) {
 	pMdl->clear_tex_wk();
 }
 
-} // namespace GPUModel
+} /* GPUModel */
+
+
+namespace GPUTexture {
+
+void prepare(sxTextureData* pTex) {
+}
+
+void release(sxTextureData* pTex) {
+}
+
+} /* GPUTexture */
+
+
+namespace GPUResources {
+
+void init_manager_ifc(cxResourceManager* pMgr) {
+	if (!pMgr) return;
+	cxResourceManager::GfxIfc rsrcGfxIfc;
+	rsrcGfxIfc.reset();
+	rsrcGfxIfc.prepareTexture = GPUTexture::prepare;
+	rsrcGfxIfc.releaseTexture = GPUTexture::release;
+	rsrcGfxIfc.prepareModel = GPUModel::prepare;
+	rsrcGfxIfc.releaseModel = GPUModel::release;
+	pMgr->set_gfx_ifc(rsrcGfxIfc);
+}
+
+} /* GPUResources */
+

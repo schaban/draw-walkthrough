@@ -3,7 +3,7 @@
 #include "draw.hpp"
 
 #include "gpu_program.hpp"
-#include "gpu_model.hpp"
+#include "gpu_resources.hpp"
 
 DRW_IMPL_BEGIN
 
@@ -19,26 +19,7 @@ static GPUProgram s_progDeform;
 
 
 static GLuint load_shader(const char* pName) {
-	return GPUProgUtils::load_shader(s_pRsrcMgr, pName, "simple_ogl");
-}
-
-
-static void prepare_texture(sxTextureData* pTex) {
-	// ...
-}
-
-static void release_texture(sxTextureData* pTex) {
-	// ...
-}
-
-static void init_rsrc_mgr() {
-	cxResourceManager::GfxIfc rsrcGfxIfc;
-	rsrcGfxIfc.reset();
-	rsrcGfxIfc.prepareTexture = prepare_texture;
-	rsrcGfxIfc.releaseTexture = release_texture;
-	rsrcGfxIfc.prepareModel = GPUModel::prepare;
-	rsrcGfxIfc.releaseModel = GPUModel::release;
-	s_pRsrcMgr->set_gfx_ifc(rsrcGfxIfc);
+	return GPUShader::load(s_pRsrcMgr, pName, "simple_ogl");
 }
 
 static void init_gpu_symbol_prog() {
@@ -97,9 +78,10 @@ static void reset_font() {
 
 static void init_impl(int shadowSize, cxResourceManager* pRsrcMgr, Draw::Font* pFont) {
 	s_pRsrcMgr = pRsrcMgr;
-	if (s_pRsrcMgr == nullptr) return;
+	s_pFont = nullptr;
+	if (!s_pRsrcMgr) return;
 	s_pFont = pFont;
-	init_rsrc_mgr();
+	GPUResources::init_manager_ifc(s_pRsrcMgr);
 	init_font();
 	init_gpu();
 }

@@ -34,6 +34,6 @@ public:
 	void draw_triangles(const size_t numTris, const size_t idxOrg, const bool idx32 = false);
 };
 
-namespace GPUProgUtils {
-	GLuint load_shader(cxResourceManager* pRsrcMgr, const char* pName, const char* pShadersPath);
+namespace GPUShader {
+	GLuint load(cxResourceManager* pRsrcMgr, const char* pName, const char* pShadersPath);
 }

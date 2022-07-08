@@ -156,9 +156,9 @@ void GPUProgram::draw_triangles(const size_t numTris, const size_t idxOrg, const
 }
 
 
-namespace GPUProgUtils {
+namespace GPUShader {
 
-GLuint load_shader(cxResourceManager* pRsrcMgr, const char* pName, const char* pShadersPath) {
+GLuint load(cxResourceManager* pRsrcMgr, const char* pName, const char* pShadersPath) {
 	GLuint sid = 0;
 	const char* pDataPath = pRsrcMgr ? pRsrcMgr->get_data_path() : ".";
 	if (pName) {
@@ -190,5 +190,5 @@ GLuint load_shader(cxResourceManager* pRsrcMgr, const char* pName, const char* p
 	return sid;
 }
 
-} // GPUProgUtils
+} // GPUShader
 
