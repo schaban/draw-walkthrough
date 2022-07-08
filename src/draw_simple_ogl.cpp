@@ -3,6 +3,7 @@
 #include "draw.hpp"
 
 #include "gpu_program.hpp"
+#include "gpu_model.hpp"
 
 DRW_IMPL_BEGIN
 
@@ -22,14 +23,6 @@ static GLuint load_shader(const char* pName) {
 }
 
 
-static void prepare_model(sxModelData* pMdl) {
-	// ...
-}
-
-static void release_model(sxModelData* pMdl) {
-	// ...
-}
-
 static void prepare_texture(sxTextureData* pTex) {
 	// ...
 }
@@ -43,8 +36,8 @@ static void init_rsrc_mgr() {
 	rsrcGfxIfc.reset();
 	rsrcGfxIfc.prepareTexture = prepare_texture;
 	rsrcGfxIfc.releaseTexture = release_texture;
-	rsrcGfxIfc.prepareModel = prepare_model;
-	rsrcGfxIfc.releaseModel = release_model;
+	rsrcGfxIfc.prepareModel = GPUModel::prepare;
+	rsrcGfxIfc.releaseModel = GPUModel::release;
 	s_pRsrcMgr->set_gfx_ifc(rsrcGfxIfc);
 }
 
