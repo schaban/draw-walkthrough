@@ -104,7 +104,7 @@ if [ $NEED_CORE -ne 0 ]; then
 	done
 fi
 
-KHR_REG_URL=https://www.khronos.org/registry
+KHR_REG_URL=https://registry.khronos.org
 INC_OGL=$INC_DIR/GL
 if [ ! -d $INC_OGL ]; then
 	mkdir -p $INC_OGL
