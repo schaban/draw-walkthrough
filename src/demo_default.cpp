@@ -104,7 +104,9 @@ static void bishojo_init(ScnObj* pObj) {
 
 	pObj->mBeforeBlendFunc = chr_before_blend;
 
-	pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, 0.0f, 0.0f), cxVec(2.0f, 0.0f, 2.0f));
+	//pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, 0.0f, 0.0f), cxVec(2.0f, 0.0f, 2.0f));
+	//pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, -60.0f, 0.0f), cxVec(2.0f, 0.0f, 4.0f));
+	pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, -50.0f, 0.0f), cxVec(2.0f, 0.0f, 2.0f));
 
 	sxValuesData* pVals = pObj->find_values("params");
 	if (pVals) {
