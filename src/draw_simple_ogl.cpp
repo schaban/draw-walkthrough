@@ -98,33 +98,7 @@ static int get_screen_height_impl() {
 	return OGLSys::get_height();
 }
 
-static cxMtx get_shadow_bias_mtx_impl() {
-	static const float bias[4 * 4] = {
-		0.5f, 0.0f, 0.0f, 0.0f,
-		0.0f, 0.5f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.5f, 0.5f, 0.0f, 1.0f
-	};
-	return nxMtx::from_mem(bias);
-}
-
-static void init_prims_impl(const uint32_t maxVtx, const uint32_t maxIdx) {
-	// ...
-}
-
-static void prim_geom_impl(const Draw::PrimGeom* pGeom) {
-	// ...
-}
-
-static void prim_impl(const Draw::Prim* pPrim, const Draw::Context* pCtx) {
-	// ...
-}
-
 static void batch_impl(cxModelWork* pWk, const int ibat, const Draw::Mode mode, const Draw::Context* pCtx) {
-	// ...
-}
-
-static void quad_impl(const Draw::Quad* pQuad) {
 	// ...
 }
 
@@ -152,14 +126,9 @@ struct DrwInit {
 		s_ifc.reset = reset_impl;
 		s_ifc.get_screen_width = get_screen_width_impl;
 		s_ifc.get_screen_height = get_screen_height_impl;
-		s_ifc.get_shadow_bias_mtx = get_shadow_bias_mtx_impl;
-		s_ifc.init_prims = init_prims_impl;
-		s_ifc.prim_geom = prim_geom_impl;
 		s_ifc.begin = begin_impl;
 		s_ifc.end = end_impl;
 		s_ifc.batch = batch_impl;
-		s_ifc.prim = prim_impl;
-		s_ifc.quad = quad_impl;
 		s_ifc.symbol = symbol_impl;
 		Draw::register_ifc_impl(&s_ifc);
 	}
