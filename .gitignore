@@ -5,3 +5,4 @@ inc/**
 core/**
 prog/**
 data/simple_ogl/**
+run.sh

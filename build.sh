@@ -13,6 +13,7 @@ SHADERS_SRC_DIR=$SRC_DIR/shaders
 SHADERS_TGT_DIR=$DATA_DIR/simple_ogl
 
 PROG_PATH=$PROG_DIR/$PROR_NAME
+RUN_PATH=run.sh
 
 FMT_BOLD="\e[1m"
 FMT_UNDER="\e[4m"
@@ -146,6 +147,7 @@ CXX=${CXX:-g++}
 
 printf "Compiling \"$FMT_BOLD$FMT_B_MAGENTA$PROG_PATH$FMT_OFF\" with $FMT_BOLD$CXX$FMT_OFF.\n"
 rm -f $PROG_PATH
+rm -f $RUN_PATH
 $CXX -std=c++11 -ggdb $DEFS $INCS $SRCS -o $PROG_PATH $LIBS $*
 if [ -f "$PROG_PATH" ]; then
 	if [ ! -d $SHADERS_TGT_DIR ]; then
@@ -156,6 +158,9 @@ if [ -f "$PROG_PATH" ]; then
 		cp -v $SHADERS_SRC_DIR/$glsl $SHADERS_TGT_DIR/$glsl
 	done
 	printf "$FMT_OFF""Done!\n"
+	echo "#!/bin/sh\n" > $RUN_PATH
+	echo "./$PROG_PATH \$*" >> $RUN_PATH
+	chmod +x $RUN_PATH
 	printf "$FMT_B_GREEN""Success""$FMT_OFF""$FMT_BOLD""!!""$FMT_OFF\n"
 else
 	printf "$FMT_B_RED""Failure""$FMT_OFF...\n"
