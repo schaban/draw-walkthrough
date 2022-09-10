@@ -164,7 +164,7 @@ GLuint load(cxResourceManager* pRsrcMgr, const char* pName, const char* pShaders
 	if (pName) {
 		char path[256];
 		char* pPath = path;
-		char pathLen = nxCore::str_len(pDataPath) + nxCore::str_len(pName) + 1;
+		size_t pathLen = nxCore::str_len(pDataPath) + nxCore::str_len(pName) + 1;
 		if (pShadersPath) {
 			pathLen += nxCore::str_len(pShadersPath) + 2;
 		} else {
