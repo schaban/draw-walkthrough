@@ -1,6 +1,6 @@
 #!/bin/sh
 
-PROR_NAME=draw_prog
+PROG_NAME=draw_prog
 
 PROG_DIR=prog
 CORE_DIR=core
@@ -12,7 +12,7 @@ SRC_DIR=src
 SHADERS_SRC_DIR=$SRC_DIR/shaders
 SHADERS_TGT_DIR=$DATA_DIR/simple_ogl
 
-PROG_PATH=$PROG_DIR/$PROR_NAME
+PROG_PATH=$PROG_DIR/$PROG_NAME
 RUN_PATH=run.sh
 
 FMT_BOLD="\e[1m"
