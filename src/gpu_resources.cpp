@@ -101,6 +101,28 @@ void release(sxModelData* pMdl) {
 	pMdl->clear_tex_wk();
 }
 
+GLuint get_vertex_buffer(sxModelData* pMdl) {
+	GLuint vb = 0;
+	if (pMdl) {
+		prepare(pMdl);
+		const GLuint* pBufMem = pMdl->get_gpu_wk<GLuint>();
+		const GLuint* pVB = &pBufMem[GPUWK_VTX_BUF];
+		vb = *pVB;
+	}
+	return vb;
+}
+
+GLuint get_index_buffer(sxModelData* pMdl) {
+	GLuint ib = 0;
+	if (pMdl) {
+		prepare(pMdl);
+		const GLuint* pBufMem = pMdl->get_gpu_wk<GLuint>();
+		const GLuint* pIB = &pBufMem[GPUWK_IDX_BUF];
+		ib = *pIB;
+	}
+	return ib;
+}
+
 } /* GPUModel */
 
 

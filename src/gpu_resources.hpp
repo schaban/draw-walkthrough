@@ -14,6 +14,8 @@ namespace GPUModel {
 	bool is_prepared(const sxModelData* pMdl);
 	void prepare(sxModelData* pMdl);
 	void release(sxModelData* pMdl);
+	GLuint get_vertex_buffer(sxModelData* pMdl);
+	GLuint get_index_buffer(sxModelData* pMdl);
 }
 
 namespace GPUTexture {
