@@ -75,7 +75,7 @@ static void bishojo_bat_pre_draw(ScnObj* pObj, const int ibat) {
 	const char* pMtlName = pObj->get_batch_mtl_name(ibat);
 	if (pMtlName && nxCore::str_eq(pMtlName, "hair")) {
 		//pObj->set_base_color_scl(1.75f);
-		pObj->set_base_color_scl(1.75f, 1.6f, 1.5f);
+		pObj->set_base_color_scl(1.75f, 1.6f, 1.95f);
 	} else {
 		//pObj->set_base_color_scl(0.5f);
 		pObj->set_base_color_scl(0.52f, 0.58f, 0.68f);
@@ -106,7 +106,8 @@ static void bishojo_init(ScnObj* pObj) {
 
 	//pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, 0.0f, 0.0f), cxVec(2.0f, 0.0f, 2.0f));
 	//pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, -60.0f, 0.0f), cxVec(2.0f, 0.0f, 4.0f));
-	pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, -50.0f, 0.0f), cxVec(2.0f, 0.0f, 2.0f));
+	//pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, -50.0f, 0.0f), cxVec(2.0f, 0.0f, 2.0f));
+	pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, 60.0f, 0.0f), cxVec(1.53f, 0.0f, -2.5f));
 
 	sxValuesData* pVals = pObj->find_values("params");
 	if (pVals) {
@@ -145,6 +146,11 @@ static void init() {
 	if (pStgObj) {
 		pStgObj->mDisableShadowCast = true;
 		pStgObj->set_base_color_scl(1.5f, 1.4f, 1.2f);
+	}
+
+	cxResourceManager* pRsrcMgr = Scene::get_rsrc_mgr();
+	if (pRsrcMgr) {
+		pRsrcMgr->prepare_all_gfx();
 	}
 }
 
