@@ -325,7 +325,7 @@ static void draw_2d() {
 		Scene::set_ref_scr_size(refSizeY, refSizeX);
 	}
 
-	const char* pText = "* CROSSCORE DRAW-WALKTHROUGH *";
+	const char* pText = "* DRAW-WALKTHROUGH *";
 	float fontW = 40;
 	float fontH = 50;
 	float x = 10;
