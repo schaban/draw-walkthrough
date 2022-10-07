@@ -8,6 +8,8 @@ DEMO_PROG_BEGIN
 #define STG_NAME "fountain"
 
 
+static int s_mode = 0;
+
 static float get_mot_speed() {
 	return 1.0f;
 }
@@ -104,10 +106,14 @@ static void bishojo_init(ScnObj* pObj) {
 
 	pObj->mBeforeBlendFunc = chr_before_blend;
 
-	//pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, 0.0f, 0.0f), cxVec(2.0f, 0.0f, 2.0f));
-	//pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, -60.0f, 0.0f), cxVec(2.0f, 0.0f, 4.0f));
-	//pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, -50.0f, 0.0f), cxVec(2.0f, 0.0f, 2.0f));
-	pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, 60.0f, 0.0f), cxVec(1.53f, 0.0f, -2.5f));
+	if (s_mode == 1) {
+		pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, 40.0f, 0.0f), cxVec(1.2f, 0.0f, 2.5f));
+	} else {
+		//pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, 0.0f, 0.0f), cxVec(2.0f, 0.0f, 2.0f));
+		//pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, -60.0f, 0.0f), cxVec(2.0f, 0.0f, 4.0f));
+		//pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, -50.0f, 0.0f), cxVec(2.0f, 0.0f, 2.0f));
+		pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, 60.0f, 0.0f), cxVec(1.53f, 0.0f, -2.5f));
+	}
 
 	sxValuesData* pVals = pObj->find_values("params");
 	if (pVals) {
@@ -122,10 +128,12 @@ static void bishojo_init(ScnObj* pObj) {
 static void bishojo_exec(ScnObj* pObj) {
 	if (!pObj) return;
 	float mspeed = get_mot_speed() * 0.5f;
-	sxMotionData* pMot = pObj->find_motion("walk");
+	sxMotionData* pMot = pObj->find_motion(s_mode == 1 ? "stand" : "walk");
 	pObj->move(pMot, mspeed * Scene::speed());
-	float addDY = 0.85f;
-	pObj->add_world_deg_y(-addDY * mspeed * Scene::speed());
+	if (s_mode != 1)  {
+		float addDY = 0.85f;
+		pObj->add_world_deg_y(-addDY * mspeed * Scene::speed());
+	}
 }
 
 static void bishojo_del(ScnObj* pObj) {
@@ -139,6 +147,8 @@ static void bishojo_del(ScnObj* pObj) {
 
 
 static void init() {
+	s_mode = nxApp::get_int_opt("mode", 0);
+
 	DEMO_ADD_CHR(bishojo);
 
 	Scene::add_obj(STG_NAME);
@@ -332,8 +342,13 @@ static void draw_2d() {
 		if (Scene::get_frame_count() > 320) {
 			alpha -= 0.01f;
 		}
-		dx += 0.125f;
-		dy += 0.5f;
+		if (s_mode == 1)  {
+			dx += 0.05f;
+			dy += 0.75f;
+		} else {
+			dx += 0.125f;
+			dy += 0.5f;
+		}
 	}
 }
 
