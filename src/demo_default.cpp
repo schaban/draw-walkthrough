@@ -319,7 +319,7 @@ static void draw_2d() {
 	float fontW = 40;
 	float fontH = 50;
 	float x = 10;
-	float y = 10;//refSizeY - (fontH * 1.7f);
+	float y = -fontH;
 	static float dx = 0.0f;
 	static float dy = 0.0f;
 	x += dx;
@@ -332,8 +332,8 @@ static void draw_2d() {
 		if (Scene::get_frame_count() > 320) {
 			alpha -= 0.01f;
 		}
-		dx += 0.5f;
-		dy += 0.75f;
+		dx += 0.25f;
+		dy += 0.5f;
 	}
 }
 
