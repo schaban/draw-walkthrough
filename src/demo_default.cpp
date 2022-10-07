@@ -332,7 +332,7 @@ static void draw_2d() {
 		if (Scene::get_frame_count() > 320) {
 			alpha -= 0.01f;
 		}
-		dx += 0.25f;
+		dx += 0.125f;
 		dy += 0.5f;
 	}
 }
