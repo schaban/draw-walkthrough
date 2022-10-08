@@ -1,6 +1,7 @@
 #!/bin/sh
 
 PROG_NAME=draw_prog
+SYS_NAME="`uname -s`"
 
 PROG_DIR=prog
 CORE_DIR=core
@@ -15,45 +16,49 @@ SHADERS_TGT_DIR=$DATA_DIR/simple_ogl
 PROG_PATH=$PROG_DIR/$PROG_NAME
 RUN_PATH=run.sh
 
-FMT_BOLD="\e[1m"
-FMT_UNDER="\e[4m"
-FMT_BLACK="\e[30m"
-FMT_BLACK_BG="\e[30m"
-FMT_RED="\e[31m"
-FMT_RED_BG="\e[41m"
-FMT_GREEN="\e[32m"
-FMT_GREEN_BG="\e[42m"
-FMT_YELLOW="\e[33m"
-FMT_YELLOW_BG="\e[43m"
-FMT_BLUE="\e[34m"
-FMT_BLUE_BG="\e[44m"
-FMT_MAGENTA="\e[35m"
-FMT_MAGENTA_BG="\e[45m"
-FMT_CYAN="\e[36m"
-FMT_CYAN_BG="\e[46m"
-FMT_WHITE="\e[37m"
-FMT_WHITE_BG="\e[47m"
-FMT_GRAY="\e[90m"
-FMT_GRAY_BG="\e[100m"
-FMT_B_RED="\e[91m"
-FMT_B_RED_BG="\e[101m"
-FMT_B_GREEN="\e[92m"
-FMT_B_GREEN_BG="\e[102m"
-FMT_B_YELLOW="\e[93m"
-FMT_B_YELLOW_BG="\e[103m"
-FMT_B_BLUE="\e[94m"
-FMT_B_BLUE_BG="\e[104m"
-FMT_B_MAGENTA="\e[95m"
-FMT_B_MAGENTA_BG="\e[105m"
-FMT_B_CYAN="\e[96m"
-FMT_B_CYAN_BG="\e[106m"
-FMT_B_WHITE="\e[97m"
-FMT_B_WHITE_BG="\e[107m"
-FMT_OFF="\e[0m"
+if [ "$SYS_NAME" = "FreeBSD" ]; then
+	NO_FMT="\0"
+fi
 
-printf "$FMT_MAGENTA$FMT_BOLD""/------------------------------------------\ ""$FMT_OFF\n"
+FMT_BOLD=${NO_FMT:-"\e[1m"}
+FMT_UNDER=${NO_FMT:-"\e[4m"}
+FMT_BLACK=${NO_FMT:-"\e[30m"}
+FMT_BLACK_BG=${NO_FMT:-"\e[30m"}
+FMT_RED=${NO_FMT:-"\e[31m"}
+FMT_RED_BG=${NO_FMT:-"\e[41m"}
+FMT_GREEN=${NO_FMT:-"\e[32m"}
+FMT_GREEN_BG=${NO_FMT:-"\e[42m"}
+FMT_YELLOW=${NO_FMT:-"\e[33m"}
+FMT_YELLOW_BG=${NO_FMT:-"\e[43m"}
+FMT_BLUE=${NO_FMT:-"\e[34m"}
+FMT_BLUE_BG=${NO_FMT:-"\e[44m"}
+FMT_MAGENTA=${NO_FMT:-"\e[35m"}
+FMT_MAGENTA_BG=${NO_FMT:-"\e[45m"}
+FMT_CYAN=${NO_FMT:-"\e[36m"}
+FMT_CYAN_BG=${NO_FMT:-"\e[46m"}
+FMT_WHITE=${NO_FMT:-"\e[37m"}
+FMT_WHITE_BG=${NO_FMT:-"\e[47m"}
+FMT_GRAY=${NO_FMT:-"\e[90m"}
+FMT_GRAY_BG=${NO_FMT:-"\e[100m"}
+FMT_B_RED=${NO_FMT:-"\e[91m"}
+FMT_B_RED_BG=${NO_FMT:-"\e[101m"}
+FMT_B_GREEN=${NO_FMT:-"\e[92m"}
+FMT_B_GREEN_BG=${NO_FMT:-"\e[102m"}
+FMT_B_YELLOW=${NO_FMT:-"\e[93m"}
+FMT_B_YELLOW_BG=${NO_FMT:-"\e[103m"}
+FMT_B_BLUE=${NO_FMT:-"\e[94m"}
+FMT_B_BLUE_BG=${NO_FMT:-"\e[104m"}
+FMT_B_MAGENTA=${NO_FMT:-"\e[95m"}
+FMT_B_MAGENTA_BG=${NO_FMT:-"\e[105m"}
+FMT_B_CYAN=${NO_FMT:-"\e[96m"}
+FMT_B_CYAN_BG=${NO_FMT:-"\e[106m"}
+FMT_B_WHITE=${NO_FMT:-"\e[97m"}
+FMT_B_WHITE_BG=${NO_FMT:-"\e[107m"}
+FMT_OFF=${NO_FMT:-"\e[0m"}
+
+printf "$FMT_MAGENTA$FMT_BOLD""/------------------------------------------\\ ""$FMT_OFF\n"
 printf " ""$FMT_BLUE_BG$FMT_B_YELLOW"" .: Compiling draw-walkthrough project :. ""$FMT_OFF\n"
-printf "$FMT_MAGENTA$FMT_BOLD""\------------------------------------------/ ""$FMT_OFF\n"
+printf "$FMT_MAGENTA$FMT_BOLD""\\------------------------------------------/ ""$FMT_OFF\n"
 
 if [ ! -d $PROG_DIR ]; then
 	mkdir -p $PROG_DIR
@@ -117,7 +122,7 @@ if [ $NEED_CORE -ne 0 ]; then
 fi
 
 NEED_OGL_INC=0
-case `uname -s` in
+case $SYS_NAME in
 	Linux)
 		NEED_OGL_INC=1
 	;;
@@ -163,7 +168,7 @@ DEFS="-DX11"
 LIBS="-lX11"
 
 DEF_CXX="g++"
-case `uname -s` in
+case $SYS_NAME in
 	OpenBSD)
 		INCS="$INCS -I/usr/X11R6/include"
 		LIBS="$LIBS -L/usr/X11R6/lib"
