@@ -63,6 +63,17 @@ CORE_SRC_URL="https://raw.githubusercontent.com/schaban/crosscore_dev/main/src"
 CORE_SRCS="crosscore.hpp crosscore.cpp demo.hpp demo.cpp draw.hpp oglsys.hpp oglsys.cpp oglsys.inc scene.hpp scene.cpp smprig.hpp smprig.cpp draw_ogl.cpp main.cpp"
 CORE_OGL_SRCS="gpu_defs.h progs.inc shaders.inc"
 
+DL_MODE="NONE"
+DL_CMD=""
+
+if [ -x "`command -v curl`" ]; then
+	DL_MODE="CURL"
+	DL_CMD="curl -o"
+elif [ -x "`command -v wget`" ]; then
+	DL_MODE="WGET"
+	DL_CMD="wget -O"
+fi
+
 NEED_CORE=0
 if [ ! -d $CORE_DIR ]; then
 	mkdir -p $CORE_DIR
@@ -94,61 +105,85 @@ if [ $NEED_CORE -ne 0 ]; then
 	for src in $CORE_SRCS; do
 		if [ ! -f $CORE_DIR/$src ]; then
 			printf "$FMT_B_BLUE""     $src""$FMT_OFF\n"
-			curl -o $CORE_DIR/$src $CORE_SRC_URL/$src
+			$DL_CMD $CORE_DIR/$src $CORE_SRC_URL/$src
 		fi
 	done
 	for src in $CORE_OGL_SRCS; do
 		if [ ! -f $CORE_DIR/ogl/$src ]; then
 			printf "$FMT_CYAN""     $src""$FMT_OFF\n"
-			curl -o $CORE_DIR/ogl/$src $CORE_SRC_URL/ogl/$src
+			$DL_CMD $CORE_DIR/ogl/$src $CORE_SRC_URL/ogl/$src
 		fi
 	done
 fi
 
-KHR_REG_URL=https://registry.khronos.org
-INC_OGL=$INC_DIR/GL
-if [ ! -d $INC_OGL ]; then
-	mkdir -p $INC_OGL
-fi
-OGL_INC_DL=0
-for kh in glext.h glcorearb.h wglext.h; do
-	if [ ! -f $INC_OGL/$kh ]; then
-		if [ $OGL_INC_DL -ne 1 ]; then
-			printf "$FMT_OFF""-> Downloading OpenGL headers...\n"
-			OGL_INC_DL=1
-		fi
-		printf "$FMT_B_GREEN""     $kh""$FMT_OFF\n"
-		curl -o $INC_OGL/$kh $KHR_REG_URL/OpenGL/api/GL/$kh
+NEED_OGL_INC=0
+case `uname -s` in
+	Linux)
+		NEED_OGL_INC=1
+	;;
+esac
+
+if [ $NEED_OGL_INC -ne 0 ]; then
+	KHR_REG_URL=https://registry.khronos.org
+	INC_OGL=$INC_DIR/GL
+	if [ ! -d $INC_OGL ]; then
+		mkdir -p $INC_OGL
 	fi
-done
-INC_KHR=$INC_DIR/KHR
-if [ ! -d $INC_KHR ]; then
-	mkdir -p $INC_KHR
-fi
-for kh in khrplatform.h; do
-	if [ ! -f $INC_KHR/$kh ]; then
-		if [ $OGL_INC_DL -ne 1 ]; then
-			printf "$FMT_OFF""-> Downloading OpenGL headers...\n"
-			OGL_INC_DL=1
+	OGL_INC_DL=0
+	for kh in glext.h glcorearb.h; do
+		if [ ! -f $INC_OGL/$kh ]; then
+			if [ $OGL_INC_DL -ne 1 ]; then
+				printf "$FMT_OFF""-> Downloading OpenGL headers...\n"
+				OGL_INC_DL=1
+			fi
+			printf "$FMT_B_GREEN""     $kh""$FMT_OFF\n"
+			$DL_CMD $INC_OGL/$kh $KHR_REG_URL/OpenGL/api/GL/$kh
 		fi
-		printf "$FMT_B_GREEN""     $kh""$FMT_OFF\n"
-		curl -o $INC_KHR/$kh $KHR_REG_URL/EGL/api/KHR/$kh
+	done
+	INC_KHR=$INC_DIR/KHR
+	if [ ! -d $INC_KHR ]; then
+		mkdir -p $INC_KHR
 	fi
-done
+	for kh in khrplatform.h; do
+		if [ ! -f $INC_KHR/$kh ]; then
+			if [ $OGL_INC_DL -ne 1 ]; then
+				printf "$FMT_OFF""-> Downloading OpenGL headers...\n"
+				OGL_INC_DL=1
+			fi
+			printf "$FMT_B_GREEN""     $kh""$FMT_OFF\n"
+			$DL_CMD $INC_KHR/$kh $KHR_REG_URL/EGL/api/KHR/$kh
+		fi
+	done
+fi
 
 INCS="-I $CORE_DIR -I $INC_DIR "
 SRCS="`ls $SRC_DIR/*.cpp` `ls $CORE_DIR/*.cpp`"
 
 DEFS="-DX11"
-LIBS="-lX11 -lpthread"
+LIBS="-lX11"
 
-LIBS="$LIBS -ldl"
-CXX=${CXX:-g++}
+DEF_CXX="g++"
+case `uname -s` in
+	OpenBSD)
+		INCS="$INCS -I/usr/X11R6/include"
+		LIBS="$LIBS -L/usr/X11R6/lib"
+		DEF_CXX="clang++"
+	;;
+	FreeBSD)
+		INCS="$INCS -I/usr/local/include"
+		LIBS="$LIBS -L/usr/local/lib"
+		DEF_CXX="clang++"
+	;;
+	Linux)
+		LIBS="$LIBS -ldl"
+	;;
+esac
+CXX=${CXX:-$DEF_CXX}
 
 printf "Compiling \"$FMT_BOLD$FMT_B_MAGENTA$PROG_PATH$FMT_OFF\" with $FMT_BOLD$CXX$FMT_OFF.\n"
 rm -f $PROG_PATH
 rm -f $RUN_PATH
-$CXX -std=c++11 -ggdb $DEFS $INCS $SRCS -o $PROG_PATH $LIBS $*
+$CXX -std=c++11 -ggdb -pthread $DEFS $INCS $SRCS -o $PROG_PATH $LIBS $*
 if [ -f "$PROG_PATH" ]; then
 	if [ ! -d $SHADERS_TGT_DIR ]; then
 		mkdir -p $SHADERS_TGT_DIR
@@ -159,7 +194,7 @@ if [ -f "$PROG_PATH" ]; then
 	done
 	printf "$FMT_OFF""Done!\n"
 	echo "#!/bin/sh\n" > $RUN_PATH
-	echo "./$PROG_PATH \$*" >> $RUN_PATH
+	echo "./$PROG_PATH -nwrk:0 \$*" >> $RUN_PATH
 	chmod +x $RUN_PATH
 	printf "$FMT_B_GREEN""Success""$FMT_OFF""$FMT_BOLD""!!""$FMT_OFF\n"
 else
