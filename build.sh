@@ -193,8 +193,8 @@ if [ -f "$PROG_PATH" ]; then
 		cp -v $SHADERS_SRC_DIR/$glsl $SHADERS_TGT_DIR/$glsl
 	done
 	printf "$FMT_OFF""Done!\n"
-	echo "#!/bin/sh\n" > $RUN_PATH
-	echo "./$PROG_PATH -nwrk:0 \$*" >> $RUN_PATH
+	printf "#!/bin/sh\n\n" > $RUN_PATH
+	printf "./$PROG_PATH -nwrk:0 \$*" >> $RUN_PATH
 	chmod +x $RUN_PATH
 	printf "$FMT_B_GREEN""Success""$FMT_OFF""$FMT_BOLD""!!""$FMT_OFF\n"
 else
