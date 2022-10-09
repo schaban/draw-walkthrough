@@ -9,6 +9,7 @@ DATA_DIR=data
 
 INC_DIR=inc
 SRC_DIR=src
+TMP_DIR=tmp
 
 SHADERS_SRC_DIR=$SRC_DIR/shaders
 SHADERS_TGT_DIR=$DATA_DIR/simple_ogl
@@ -56,9 +57,9 @@ FMT_B_WHITE=${NO_FMT:-"\e[97m"}
 FMT_B_WHITE_BG=${NO_FMT:-"\e[107m"}
 FMT_OFF=${NO_FMT:-"\e[0m"}
 
-printf "$FMT_MAGENTA$FMT_BOLD""/------------------------------------------\\ ""$FMT_OFF\n"
+printf "$FMT_MAGENTA$FMT_BOLD""*------------------------------------------* ""$FMT_OFF\n"
 printf " ""$FMT_BLUE_BG$FMT_B_YELLOW"" .: Compiling draw-walkthrough project :. ""$FMT_OFF\n"
-printf "$FMT_MAGENTA$FMT_BOLD""\\------------------------------------------/ ""$FMT_OFF\n"
+printf "$FMT_MAGENTA$FMT_BOLD""*------------------------------------------* ""$FMT_OFF\n"
 
 if [ ! -d $PROG_DIR ]; then
 	mkdir -p $PROG_DIR
@@ -67,6 +68,11 @@ fi
 CORE_SRC_URL="https://raw.githubusercontent.com/schaban/crosscore_dev/main/src"
 CORE_SRCS="crosscore.hpp crosscore.cpp demo.hpp demo.cpp draw.hpp oglsys.hpp oglsys.cpp oglsys.inc scene.hpp scene.cpp smprig.hpp smprig.cpp draw_ogl.cpp main.cpp"
 CORE_OGL_SRCS="gpu_defs.h progs.inc shaders.inc"
+
+CORE_MAC_SRCS=""
+if [ "$SYS_NAME" = "Darwin" ]; then
+	CORE_MAC_SRCS="mac_main.m mac_ifc.h"
+fi
 
 DL_MODE="NONE"
 DL_CMD=""
@@ -103,6 +109,15 @@ else
 			fi
 		done
 	fi
+	if [ $NEED_CORE -ne 1 ]; then
+		if [ -n "$CORE_MAC_SRCS" ]; then
+			for src in $CORE_MAC_SRCS; do
+				if [ ! -f $CORE_DIR/mac/$src ]; then
+					NEED_CORE=1
+				fi
+			done
+		fi
+	fi
 fi
 
 if [ $NEED_CORE -ne 0 ]; then
@@ -119,6 +134,15 @@ if [ $NEED_CORE -ne 0 ]; then
 			$DL_CMD $CORE_DIR/ogl/$src $CORE_SRC_URL/ogl/$src
 		fi
 	done
+	if [ -n "$CORE_MAC_SRCS" ]; then
+		mkdir -p $CORE_DIR/mac
+		for src in $CORE_MAC_SRCS; do
+			if [ ! -f $CORE_DIR/mac/$src ]; then
+				printf "$FMT_CYAN""     $src""$FMT_OFF\n"
+				$DL_CMD $CORE_DIR/mac/$src $CORE_SRC_URL/mac/$src
+			fi
+		done
+	fi
 fi
 
 NEED_OGL_INC=0
@@ -179,8 +203,13 @@ case $SYS_NAME in
 		LIBS="$LIBS -L/usr/local/lib"
 		DEF_CXX="clang++"
 	;;
+	Darwin)
+		DEFS=""
+		LIBS="-framework Foundation -framework Cocoa -framework OpenGL -Xlinker -w"
+		DEF_CXX="clang++"
+	;;
 	Linux)
-		LIBS="$LIBS -ldl"
+		LIBS="$LIBS -ldl -lpthread"
 	;;
 esac
 CXX=${CXX:-$DEF_CXX}
@@ -188,7 +217,21 @@ CXX=${CXX:-$DEF_CXX}
 printf "Compiling \"$FMT_BOLD$FMT_B_MAGENTA$PROG_PATH$FMT_OFF\" with $FMT_BOLD$CXX$FMT_OFF.\n"
 rm -f $PROG_PATH
 rm -f $RUN_PATH
-$CXX -std=c++11 -ggdb -pthread $DEFS $INCS $SRCS -o $PROG_PATH $LIBS $*
+if [ "$SYS_NAME" = "Darwin" ]; then
+	if [ ! -d $TMP_DIR ]; then
+		mkdir -p $TMP_DIR
+	fi
+	MAC_MAIN_SRC=$CORE_DIR/mac/mac_main.m
+	MAC_MAIN_OBJ=$TMP_DIR/mac_main.o
+	rm -f $MAC_MAIN_OBJ
+	clang -Wno-deprecated-declarations $MAC_MAIN_SRC -Og -c -o $MAC_MAIN_OBJ
+	if [ ! -f $MAC_MAIN_OBJ ]; then
+		exit 1
+	fi
+	SRCS="$SRCS $MAC_MAIN_OBJ"
+	INCS="$INCS -I $CORE_DIR/mac"
+fi
+$CXX -std=c++11 -ggdb $DEFS $INCS $SRCS -o $PROG_PATH $LIBS $*
 if [ -f "$PROG_PATH" ]; then
 	if [ ! -d $SHADERS_TGT_DIR ]; then
 		mkdir -p $SHADERS_TGT_DIR
@@ -199,7 +242,7 @@ if [ -f "$PROG_PATH" ]; then
 	done
 	printf "$FMT_OFF""Done!\n"
 	printf "#!/bin/sh\n\n" > $RUN_PATH
-	printf "./$PROG_PATH -nwrk:0 \$*" >> $RUN_PATH
+	printf "./$PROG_PATH -nwrk:0 \$*\n" >> $RUN_PATH
 	chmod +x $RUN_PATH
 	printf "$FMT_B_GREEN""Success""$FMT_OFF""$FMT_BOLD""!!""$FMT_OFF\n"
 else
