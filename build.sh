@@ -200,7 +200,7 @@ case $SYS_NAME in
 	;;
 	FreeBSD)
 		INCS="$INCS -I/usr/local/include"
-		LIBS="$LIBS -L/usr/local/lib"
+		LIBS="$LIBS -lpthread -L/usr/local/lib"
 		DEF_CXX="clang++"
 	;;
 	Darwin)
