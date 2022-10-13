@@ -18,7 +18,7 @@ PROG_PATH=$PROG_DIR/$PROG_NAME
 RUN_PATH=run.sh
 
 if [ "$SYS_NAME" = "FreeBSD" ]; then
-	NO_FMT="\0"
+	NO_FMT=""
 fi
 
 FMT_BOLD=${NO_FMT-"\e[1m"}
