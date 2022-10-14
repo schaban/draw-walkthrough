@@ -2,6 +2,7 @@ tmp/**
 etc/**
 hou/**
 inc/**
+lib/**
 core/**
 prog/**
 data/simple_ogl/**
