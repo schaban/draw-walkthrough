@@ -178,8 +178,25 @@ GLuint load(cxResourceManager* pRsrcMgr, const char* pName, const char* pShaders
 			size_t srcSize = 0;
 			char* pSrc = (char*)nxCore::bin_load(pPath, &srcSize, false, true);
 			if (pSrc) {
-				GLenum kind = nxCore::str_ends_with(pName, ".vert") ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER;
-				sid = OGLSys::compile_shader_str(pSrc, srcSize, kind);
+				char* pCompileSrc = pSrc;
+				size_t compileSize = srcSize;
+				if (!OGLSys::is_es()) {
+					const char* pVer = "#version 150\n";
+					size_t verLen = nxCore::str_len(pVer);
+					compileSize += verLen;
+					pCompileSrc = (char*)nxCore::mem_alloc(compileSize, "GPUShader:tmp");
+					if (pCompileSrc) {
+						nxCore::mem_copy(pCompileSrc, pVer, verLen);
+						nxCore::mem_copy(pCompileSrc + verLen, pSrc, srcSize);
+					}
+				}
+				if (pCompileSrc) {
+					GLenum kind = nxCore::str_ends_with(pName, ".vert") ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER;
+					sid = OGLSys::compile_shader_str(pCompileSrc, compileSize, kind);
+					if (pCompileSrc != pSrc) {
+						nxCore::mem_free(pCompileSrc);
+					}
+				}
 				nxCore::bin_unload(pSrc);
 			}
 			if (pPath != path) {
