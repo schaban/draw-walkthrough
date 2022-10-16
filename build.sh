@@ -57,6 +57,26 @@ FMT_B_WHITE=${NO_FMT-"\e[97m"}
 FMT_B_WHITE_BG=${NO_FMT-"\e[107m"}
 FMT_OFF=${NO_FMT-"\e[0m"}
 
+if [ "$#" -gt 0 ]; then
+	case $1 in
+		clean)
+			printf "$FMT_RED$FMT_BOLD""Removing temporary files!""$FMT_OFF\n"
+			for tdir in core inc prog tmp; do
+				if [ -d $tdir ]; then
+					printf " * ""$FMT_BOLD""$tdir""$FMT_OFF\n"
+					rm -rf $tdir/*
+					rmdir $tdir
+				fi
+			done
+			if [ -f $RUN_PATH ]; then
+				printf " - ""$FMT_BOLD""$RUN_PATH""$FMT_OFF\n"
+				rm -f $RUN_PATH
+			fi
+			exit 0
+		;;
+	esac
+fi
+
 printf "$FMT_MAGENTA$FMT_BOLD""*------------------------------------------* ""$FMT_OFF\n"
 printf " ""$FMT_BLUE_BG$FMT_B_YELLOW"" .: Compiling draw-walkthrough project :. ""$FMT_OFF\n"
 printf "$FMT_MAGENTA$FMT_BOLD""*------------------------------------------* ""$FMT_OFF\n"
