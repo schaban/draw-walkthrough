@@ -87,6 +87,7 @@ static void init_impl(int shadowSize, cxResourceManager* pRsrcMgr, Draw::Font* p
 }
 
 static void reset_impl() {
+	reset_font();
 	reset_gpu();
 }
 
