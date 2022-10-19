@@ -164,26 +164,6 @@ static void init() {
 	}
 }
 
-static void view_exec0() {
-	ScnObj* pTgtObj = Scene::find_obj("bishojo");
-	if (!pTgtObj) return;
-	cxVec tgt = pTgtObj->get_center_pos();
-	//tgt.y -= 0.1f;
-	static float ry = 0.0f;
-	cxQuat q = nxQuat::from_degrees(0, ry, 0);
-	cxVec offs = q.apply(cxVec(0.0f, -0.2f, 4.0f));
-	cxVec pos = tgt + offs;
-	static cxVec prevPos;
-	static cxVec prevTgt;
-	if (Scene::get_frame_count() > 0) {
-		pos = nxCalc::approach(prevPos, pos, 30);
-		tgt = nxCalc::approach(prevPos, tgt, 30);
-	}
-	prevPos = pos;
-	prevTgt = tgt;
-	Scene::set_view(pos, tgt);
-}
-
 static void view_exec() {
 	static int tgtCnt = 0;
 	static float xoffs = 0.0f;
