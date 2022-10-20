@@ -9,6 +9,9 @@ DEMO_PROG_BEGIN
 
 
 static int s_mode = 0;
+static float s_csclChr = 1.0f;
+static float s_csclStg = 1.0f;
+static float s_csclTxt = 1.0f;
 
 static float get_mot_speed() {
 	return 1.0f;
@@ -75,13 +78,14 @@ static void bishojo_bat_pre_draw(ScnObj* pObj, const int ibat) {
 	if (!pObj) return;
 	Scene::push_ctx();
 	const char* pMtlName = pObj->get_batch_mtl_name(ibat);
+	cxColor baseClrScl(1.0f);
 	if (pMtlName && nxCore::str_eq(pMtlName, "hair")) {
-		//pObj->set_base_color_scl(1.75f);
-		pObj->set_base_color_scl(1.75f, 1.6f, 1.95f);
+		baseClrScl.set(1.75f, 1.6f, 1.95f);
 	} else {
-		//pObj->set_base_color_scl(0.5f);
-		pObj->set_base_color_scl(0.52f, 0.58f, 0.68f);
+		baseClrScl.set(0.52f, 0.58f, 0.68f);
 	}
+	baseClrScl.scl(s_csclChr);
+	pObj->set_base_color_scl(baseClrScl);
 	if (pMtlName && nxCore::str_eq(pMtlName, "head")) {
 		Scene::set_hemi_exp(0.5f);
 	} else {
@@ -148,6 +152,9 @@ static void bishojo_del(ScnObj* pObj) {
 
 static void init() {
 	s_mode = nxApp::get_int_opt("mode", 0);
+	s_csclChr = nxApp::get_float_opt("cscl_chr", 1.0f);
+	s_csclStg = nxApp::get_float_opt("cscl_stg", 1.0f);
+	s_csclTxt = nxApp::get_float_opt("cscl_txt", 1.0f);
 
 	DEMO_ADD_CHR(bishojo);
 
@@ -155,7 +162,9 @@ static void init() {
 	ScnObj* pStgObj = Scene::find_obj(STG_NAME);
 	if (pStgObj) {
 		pStgObj->mDisableShadowCast = true;
-		pStgObj->set_base_color_scl(1.5f, 1.4f, 1.2f);
+		cxColor baseScl(1.5f, 1.4f, 1.2f);
+		baseScl.scl(s_csclStg);
+		pStgObj->set_base_color_scl(baseScl);
 	}
 
 	cxResourceManager* pRsrcMgr = Scene::get_rsrc_mgr();
@@ -316,9 +325,15 @@ static void draw_2d() {
 	y += dy;
 	static float alpha = 0.9f;
 	if (alpha > 0.0f) {
-		draw_msg(pText, x - 1, y + 1, fontW, fontH, cxColor(0.1f, 0.31f, 0.1f, alpha * 0.5f));
-		draw_msg(pText, x + 1, y - 1, fontW, fontH, cxColor(0.2f, 0.51f, 0.1f, alpha * 0.5f));
-		draw_msg(pText, x, y, fontW, fontH, cxColor(0.95f, 0.5f, 0.25f, alpha));
+		cxColor c1(0.1f, 0.31f, 0.1f, alpha * 0.5f);
+		cxColor c2(0.2f, 0.51f, 0.1f, alpha * 0.5f);
+		cxColor c0(0.95f, 0.5f, 0.25f, alpha);
+		c0.scl_rgb(s_csclTxt);
+		c1.scl_rgb(s_csclTxt);
+		c2.scl_rgb(s_csclTxt);
+		draw_msg(pText, x - 1, y + 1, fontW, fontH, c1);
+		draw_msg(pText, x + 1, y - 1, fontW, fontH, c2);
+		draw_msg(pText, x, y, fontW, fontH, c0);
 		if (Scene::get_frame_count() > 320) {
 			alpha -= 0.01f;
 		}
