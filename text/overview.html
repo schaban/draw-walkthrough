@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en-us">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Expires" content="0">
+	<link rel="shortcut icon" href="favicon.ico">
+	<title>Draw-Walkthrough: Overview</title>
+	<link href="dw.css" rel="stylesheet">
+</head>
+
+<body>
+	<table id="main_text"><tr><td>
+
+	<table><tr>
+	<td>
+	<a href="pic/obj_types.jpg"><img src="pic/obj_types.jpg" width="97%"></a>
+	</td>
+	<td style="font-size: 150%; color: #772222;">
+		&#x261C;&nbsp;
+		<br><br><br><br><br><br><br><br><br><br><br>
+	</td>
+	<td>
+	Scene displayed after compiling and running the sample program will
+	look similar to what's shown on the left side of this image.
+	<br>
+	Conceptually this scene can be split into three distinct types of objects:
+	<br>
+	&nbsp;<b>A</b> - animated character, deformable model;<br>
+	&nbsp;<b>B</b> - background stage, static model;<br>
+	&nbsp;<b>C</b> - text message;<br>
+	<br><br><br><br><br><br><br><br><br>
+	</td>
+	</tr></table>
+
+	<br><br><br>
+	<table>
+	<tr>
+	<td>
+		<a href="pic/chr_scn.jpg"><img src="pic/chr_scn.jpg" width="80%"></a>
+	</td>
+	<td>
+		<br><br><br>
+		<a href="pic/chr_geo.jpg"><img src="pic/chr_geo.jpg" width="80%"></a>
+	</td>
+	<td>
+		<br><br><br>
+		<a href="pic/chr_wgt.jpg"><img src="pic/chr_wgt.jpg" width="80%"></a>
+	</td>
+	<td>
+		<br><br><br>
+		<a href="pic/chr_bat.jpg"><img src="pic/chr_bat.jpg" width="80%"></a>
+	</td>
+	</tr>
+	<tr>
+		<td>
+			<div style="font-size: 150%; color: #552222;">&#x261D;</div>
+			Of these three types animated<br>
+			character is the most complex.
+		</td>
+		<td>
+			<div style="font-size: 150%; color: #552222;">&#x261D;</div>
+			Base geometry in rest position.
+		</td>
+		<td>
+			<div style="font-size: 150%; color: #552222;">&#x261D;</div>
+			Weights and joints.
+		</td>
+		<td>
+			<div style="font-size: 150%; color: #552222;">&#x261D;</div>
+			Batches.
+		</td>
+	</tr>
+	</table>
+
+	<br>
+	<div class="todo"><b>TODO</b>: !! Expand on the above !!</div>
+
+	<br><br>
+
+	<table>
+	<tr>
+	<td>
+		<a href="pic/stg_scn.jpg"><img src="pic/stg_scn.jpg" width="90%"></a>
+	</td>
+	<td>
+		<br><br><br>
+		<a href="pic/stg_geo.jpg"><img src="pic/stg_geo.jpg" width="80%"></a>
+	</td>
+	<td>
+		<br><br><br>
+		<a href="pic/stg_bat.jpg"><img src="pic/stg_bat.jpg" width="80%"></a>
+	</td>
+	</tr>
+	<tr>
+		<td>
+			<div style="font-size: 150%; color: #552222;">&#x261D;</div>
+			Stage model is static, so there is<br>
+			no need to deform or even move it,<br>
+			so this object type is much simpler.
+		</td>
+		<td>
+			<div style="font-size: 150%; color: #552222;">&#x261D;</div>
+			Only model geometry is needed,<br>
+			no weights and joints.
+		</td>
+		<td>
+			<div style="font-size: 150%; color: #552222;">&#x261D;</div>
+			But it's still split in separate<br>
+			batches for drawing.
+		</td>
+	</tr>
+	</table>
+
+	<br><br><br>
+
+	<table>
+	<tr>
+	<td>
+		Text is the simplest type.<br>
+		It depends on font geometry data,
+		where each letter's shape represented as a set of triangles.<br>
+		That is, each such shape is similar to a batch in model data.
+		Complete message is diplayed by drawing its letters one by one.
+		<br><br><br>
+	</td>
+	<td>
+		<div style="font-size: 150%; color: #552222;">&nbsp;&#x261E;</div>
+		<br><br><br><br><br>
+	</td>
+	<td>
+		<a href="pic/txt_geo.jpg"><img src="pic/txt_geo.jpg" width="50%"></a>
+	</td>
+	<td>
+	</tr>
+	</table>
+
+	<br><br><br>
+	
+	<br>
+	<div class="todo"><b>TODO</b>: !! Explain drawing mechanism, ref. Draw::Ifc, [batch, symbol] calls !!</div>
+
+	<a href="https://github.com/schaban/crosscore_dev/blob/main/src/draw.hpp">draw.hpp</a>:<br>
+	<code>
+struct Ifc {
+	...
+
+	void (*init)(const int shadowSize, cxResourceManager* pRsrcMgr, Font* pFont);
+	void (*reset)();
+
+	int (*get_screen_width)();
+	int (*get_screen_height)();
+
+	cxMtx (*get_shadow_bias_mtx)();
+
+	void (*init_prims)(const uint32_t maxVtx, const uint32_t maxIdx);
+	void (*prim_geom)(const PrimGeom* pGeom);
+
+	void (*begin)(const cxColor& clearColor);
+	void (*end)();
+
+	void (*<b>batch</b>)(cxModelWork* pWk, const int ibat, const Mode mode, const Context* pCtx);
+	void (*prim)(const Prim* pPrim, const Context* pCtx);
+	void (*quad)(const Quad* pQuad);
+	void (*<b>symbol</b>)(const Symbol* pSym);
+};
+	</code>
+	</td></tr></table>
+</body>
+
+</html>
