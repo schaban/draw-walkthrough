@@ -44,6 +44,11 @@ a {
 	text-decoration: none;
 }
 
+.manicule {
+	font-size: 150%;
+	color: #552222;
+}
+
 .todo {
 	font-size: 110%;
 	color: #772222;
