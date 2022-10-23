@@ -184,14 +184,19 @@ GLuint load(cxResourceManager* pRsrcMgr, const char* pName, const char* pShaders
 			if (pSrc) {
 				char* pCompileSrc = pSrc;
 				size_t compileSize = srcSize;
-				if (!OGLSys::is_es()) {
-					const char* pVer = "#version 150\n";
-					size_t verLen = nxCore::str_len(pVer);
-					compileSize += verLen;
+				const char* pPrologue = nullptr;
+				if (OGLSys::is_es()) {
+					pPrologue = "precision highp float;\n";
+				} else {
+					pPrologue = "#version 150\n";
+				}
+				if (pPrologue) {
+					size_t plLen = nxCore::str_len(pPrologue);
+					compileSize += plLen;
 					pCompileSrc = (char*)nxCore::mem_alloc(compileSize, "GPUShader:tmp");
 					if (pCompileSrc) {
-						nxCore::mem_copy(pCompileSrc, pVer, verLen);
-						nxCore::mem_copy(pCompileSrc + verLen, pSrc, srcSize);
+						nxCore::mem_copy(pCompileSrc, pPrologue, plLen);
+						nxCore::mem_copy(pCompileSrc + plLen, pSrc, srcSize);
 					}
 				}
 				if (pCompileSrc) {
