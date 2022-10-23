@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en-us">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Expires" content="0">
+	<link rel="shortcut icon" href="favicon.ico">
+	<title>Draw-Walkthrough: symbol</title>
+	<link href="dw.css" rel="stylesheet">
+</head>
+
+<body>
+	<table id="main_text"><tr><td>
+
+	<table  style="width:75%"><tr>
+	<td>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="pic/sym_geo.jpg"><img src="pic/sym_geo.jpg" width="75%"></a>
+	</td>
+	<td class="manicule">
+	<br>
+	&#x261C;&nbsp;&nbsp;&nbsp;&nbsp;
+	<br><br><br><br><br><br><br><br><br><br><br><br>
+	</td>
+	<td>
+		<br>
+		<b>Geometry Buffers</b>:<br>
+		Vertex Buffer (VB) stores point positions,<br>
+		Index Buffer (IB) stores triples of VB indices
+		that define triangles.
+		<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+	</td>
+	</tr></table>
+	<br>
+
+
+	<div class="todo"><b>TODO</b>: !! VB -> ARRAY_BUFFER, IB -> ELEMENT_ARRAY_BUFFER, GL calls !!</div>
+	<a href="https://registry.khronos.org/OpenGL-Refpages/gl4/html/glGenBuffers.xhtml">glGenBuffers</a>
+	<br>
+	<a href="https://registry.khronos.org/OpenGL-Refpages/gl4/html/glBindBuffer.xhtml">glBindBuffer</a>
+	<br>
+	<a href="https://registry.khronos.org/OpenGL-Refpages/gl4/html/glBufferData.xhtml">glBufferData</a>
+
+	<br><br><br>
+
+	<a href="https://github.com/schaban/draw-walkthrough/blob/main/src/draw_simple_ogl.cpp">draw_simple_ogl.cpp</a>
+
+	<code>
+static void init_font() {
+	Draw::Font* pFont = s_pFont;
+	if (pFont != nullptr) {
+		glGenBuffers(1, &s_fontVBO);
+		glGenBuffers(1, &s_fontIBO);
+		if (s_fontVBO && s_fontIBO) {
+			glBindBuffer(GL_ARRAY_BUFFER, s_fontVBO);
+			glBufferData(GL_ARRAY_BUFFER,
+				pFont->numPnts * sizeof(xt_float2),
+				pFont->pPnts,
+				GL_STATIC_DRAW
+			);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_fontIBO);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+				pFont->numTris * 3 * sizeof(uint16_t),
+				pFont->pTris,
+				GL_STATIC_DRAW
+			);
+		}
+	}
+}
+	</code>
+	<div class="todo"><b>TODO</b>: !! Explain STATIC_DRAW !!</div>
+
+	<br><br>
+	<a href="https://github.com/schaban/draw-walkthrough/blob/main/src/shaders/symbol.vert">symbol.vert</a>
+	<code>
+attribute vec2 vtx_pos;
+
+uniform vec4 prm_xform;
+
+void main() {
+	vec2 pos = vtx_pos;
+	vec2 offs = prm_xform.xy;
+	vec2 scl = prm_xform.zw;
+	pos *= scl;
+	pos += offs;
+	gl_Position = vec4(pos.x, pos.y, 0.0, 1.0);
+}
+	</code>
+	<div class="todo"><b>TODO</b>: !! Explain vtx_pos, prm_xform !!</div>
+
+
+	<br><br><br>
+	<a href="https://github.com/schaban/draw-walkthrough/blob/main/src/draw_simple_ogl.cpp">draw_simple_ogl.cpp</a>
+	<code>
+void symbol_impl(const Draw::Symbol* pSym) {
+	Draw::Font* pFont = s_pFont;
+	GPUProgram* pProg = &s_progSymbol;
+	if (pFont != nullptr && pSym && pProg->is_valid()) {
+		int sym = pSym->sym;
+		Draw::Font::SymInfo* pInfo = &pFont->pSyms[sym];
+
+		/* set geometry buffers and vertex description */
+		glBindBuffer(GL_ARRAY_BUFFER, s_fontVBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_fontIBO);
+		pProg->enable_vertex_vec2("vtx_pos", sizeof(xt_float2), 0);
+
+		/* set parameters */
+		float ox = pSym->ox*2.0f - 1.0f;
+		float oy = pSym->oy*2.0f - 1.0f;
+		float sx = pSym->sx*2.0f;
+		float sy = pSym->sy*2.0f;
+		pProg->set_vector("prm_xform", ox, oy, sx, sy);
+
+		pProg->draw_triangles(pInfo->numTris, pInfo->idxOrg);
+		pProg->disable_vertex_inputs();
+	}
+}
+	</code>
+	<div class="todo"><b>TODO</b>: !! Explain [0,1]->[-1,1] mapping, enable_vertex_*, set_vector !!</div>
+
+	<br>
+	<code style="width: 30%">./run.sh -draw:simple_ogl</code>
+	<img src="pic/sym_impl1.jpg" width="50%">
+
+	<br><br><br>
+	<a href="https://github.com/schaban/draw-walkthrough/blob/main/src/shaders/symbol.frag">symbol.frag</a>
+	<code>
+uniform vec4 prm_color;
+
+void main() {
+	gl_FragColor = prm_color;
+}
+	</code>
+
+	<br><br><br>
+	<a href="https://github.com/schaban/draw-walkthrough/blob/main/src/draw_simple_ogl.cpp">draw_simple_ogl.cpp</a>
+	<code>
+void symbol_impl(const Draw::Symbol* pSym) {
+	Draw::Font* pFont = s_pFont;
+	GPUProgram* pProg = &s_progSymbol;
+	if (pFont != nullptr && pSym && pProg->is_valid()) {
+		int sym = pSym->sym;
+		Draw::Font::SymInfo* pInfo = &pFont->pSyms[sym];
+
+		/* set rendering options */
+		/* enable semi-transparency */
+		glEnable(GL_BLEND);
+		glBlendEquation(GL_FUNC_ADD);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		/* backface culling, frontfacing triangles defined clockwise */
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glFrontFace(GL_CW);
+		/* disable depth-buffer */
+		glDepthMask(GL_FALSE);
+		glDisable(GL_DEPTH_TEST);
+
+		/* set geometry buffers and vertex description */
+		glBindBuffer(GL_ARRAY_BUFFER, s_fontVBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_fontIBO);
+		pProg->enable_vertex_vec2("vtx_pos", sizeof(xt_float2), 0);
+
+		/* set parameters */
+		float ox = pSym->ox*2.0f - 1.0f;
+		float oy = pSym->oy*2.0f - 1.0f;
+		float sx = pSym->sx*2.0f;
+		float sy = pSym->sy*2.0f;
+		pProg->set_vector("prm_xform", ox, oy, sx, sy);
+		pProg->set_color("prm_color", pSym->clr);
+
+		pProg->draw_triangles(pInfo->numTris, pInfo->idxOrg);
+		pProg->disable_vertex_inputs();
+	}
+}
+	</code>
+
+	<br>
+	<code style="width: 30%">./run.sh -draw:simple_ogl</code>
+	<img src="pic/sym_impl2.jpg" width="50%">
+
+	</td></tr></table><!-- main_text -->
+</body>
+
+</html>
