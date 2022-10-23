@@ -58,13 +58,13 @@ static bool ck_gl_num_elems(const int numElems) {
 	return res;
 }
 
-void GPUProgram::enable_gl_vertex_input(const char* pName, const int numElems, const size_t stride, const size_t offs) {
+void GPUProgram::enable_gl_vertex_input(const char* pName, const int numElems, const size_t stride, const size_t offs, const bool isInt) {
 	if (is_valid() && pName && ck_gl_num_elems(numElems) && stride > 0) {
 		if (mInputCnt < GPUPROG_MAX_VTX_INPUTS) {
 			GLint loc = glGetAttribLocation(get_id(), pName);
 			if (loc >= 0) {
 				glEnableVertexAttribArray(loc);
-				glVertexAttribPointer(loc, numElems, GL_FLOAT, GL_FALSE, (GLsizei)stride, (const void*)offs);
+				glVertexAttribPointer(loc, numElems, isInt ? GL_INT : GL_FLOAT, GL_FALSE, (GLsizei)stride, (const void*)offs);
 				mEnabledInputLocs[mInputCnt] = loc;
 				++mInputCnt;
 			}
@@ -128,6 +128,10 @@ void GPUProgram::enable_vertex_vec3(const char* pName, const size_t stride, cons
 
 void GPUProgram::enable_vertex_vec4(const char* pName, const size_t stride, const size_t offs) {
 	enable_gl_vertex_input(pName, 4, stride, offs);
+}
+
+void GPUProgram::enable_vertex_int4(const char* pName, const size_t stride, const size_t offs) {
+	enable_gl_vertex_input(pName, 4, stride, offs, true);
 }
 
 void GPUProgram::clear_inputs() {

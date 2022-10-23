@@ -8,7 +8,7 @@ protected:
 
 	void set_gl_v4(const char* pName, const float* pVecs, const size_t nvecs = 1) const;
 	void set_gl_m(const char* pName, const float* pMtx, const size_t nmtx = 1) const;
-	void enable_gl_vertex_input(const char* pName, const int numElems, const size_t stride, const size_t offs);
+	void enable_gl_vertex_input(const char* pName, const int numElems, const size_t stride, const size_t offs, const bool isInt = false);
 	void clear_inputs();
 
 public:
@@ -30,6 +30,7 @@ public:
 	void enable_vertex_vec2(const char* pName, const size_t stride, const size_t offs);
 	void enable_vertex_vec3(const char* pName, const size_t stride, const size_t offs);
 	void enable_vertex_vec4(const char* pName, const size_t stride, const size_t offs);
+	void enable_vertex_int4(const char* pName, const size_t stride, const size_t offs);
 	void disable_vertex_inputs();
 	void draw_triangles(const size_t numTris, const size_t idxOrg, const bool idx32 = false);
 };
