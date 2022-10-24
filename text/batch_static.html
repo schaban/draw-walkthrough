@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en-us">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Expires" content="0">
+	<link rel="shortcut icon" href="favicon.ico">
+	<title>Draw-Walkthrough: batch (static)</title>
+	<link href="dw.css" rel="stylesheet">
+</head>
+
+<body>
+	<table id="main_text"><tr><td>
+
+
+	<a href="https://github.com/schaban/draw-walkthrough/blob/main/src/shaders/batch.frag">batch.frag</a>
+	<code>
+varying vec4 pix_clr;
+
+void main() {
+	gl_FragColor = pix_clr;
+}
+	</code>
+
+
+	<br><br><br>
+	<a href="https://github.com/schaban/draw-walkthrough/blob/main/src/shaders/batch_static.vert">batch_static.vert</a>
+	<code>
+attribute vec3 vtx_pos;
+attribute vec3 vtx_nrm;
+attribute vec2 vtx_tex;
+attribute vec4 vtx_clr;
+
+uniform mat4 prm_viewproj;
+
+varying vec4 pix_clr;
+
+void main() {
+	pix_clr = vtx_clr;
+	gl_Position = prm_viewproj * vec4(vtx_pos, 1.0);
+}
+	</code>
+
+
+	<br><br><br>
+	<a href="https://github.com/schaban/draw-walkthrough/blob/main/src/draw_simple_ogl.cpp">draw_simple_ogl.cpp</a>
+	<code>
+static void batch_impl(cxModelWork* pWk, const int ibat, const Draw::Mode mode, const Draw::Context* pCtx) {
+	if (mode == Draw::DRWMODE_SHADOW_CAST) return;
+	if (!pCtx) return;
+	if (!pWk) return;
+	sxModelData* pMdl = pWk->mpData;
+	if (!pMdl) return;
+	if (!pMdl->ck_batch_id(ibat)) return;
+	bool skinFlg = pMdl->has_skin();
+
+	const sxModelData::Batch* pBat = pMdl->get_batch_ptr(ibat);
+	if (!pBat) return;
+	const sxModelData::Material* pMtl = pMdl->get_material(pBat->mMtlId);
+	if (!pMtl) return;
+
+	GPUProgram* pProg = nullptr;
+	GLsizei stride = 0;
+	if (skinFlg) {		<div style="color: #EE5544;">		/* skip deformable models for now */</div>	} else {
+		pProg = &s_progStatic;
+		stride = (GLsizei)sizeof(GPUGeom);
+	}
+	if (stride <= 0) return;
+	if (!pProg) return;
+	if (!pProg->is_valid()) return;
+	pProg->use();
+
+	/* batch data origin in VB */
+	size_t vbOrg = pBat->mMinIdx * stride;
+
+	/* set geometry buffers and vertex description */
+	GLuint vbo = GPUModel::get_vertex_buffer(pMdl);
+	GLuint ibo = GPUModel::get_index_buffer(pMdl);
+	if (!(vbo > 0 && ibo > 0)) return;
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	pProg->enable_vertex_vec3("vtx_pos", stride, vbOrg + offsetof(GPUGeom, pos));
+	pProg->enable_vertex_vec3("vtx_nrm", stride, vbOrg + offsetof(GPUGeom, nrm));
+	pProg->enable_vertex_vec2("vtx_tex", stride, vbOrg + offsetof(GPUGeom, tex));
+	pProg->enable_vertex_vec4("vtx_clr", stride, vbOrg + offsetof(GPUGeom, clr));
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+
+	/* set rendering options */
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glFrontFace(GL_CW);
+
+	glDisable(GL_BLEND);
+
+	glDepthMask(GL_TRUE);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+
+	/* set parameters */
+	pProg->set_matrix("prm_viewproj", pCtx->view.mViewProjMtx);
+
+	pProg->draw_triangles(pBat->mTriNum, pBat->mIdxOrg);
+	pProg->disable_vertex_inputs();
+}
+	</code>
+
+	</td></tr></table><!-- main_text -->
+</body>
+
+</html>
