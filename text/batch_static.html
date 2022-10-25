@@ -59,8 +59,6 @@ static void batch_impl(cxModelWork* pWk, const int ibat, const Draw::Mode mode, 
 
 	const sxModelData::Batch* pBat = pMdl->get_batch_ptr(ibat);
 	if (!pBat) return;
-	const sxModelData::Material* pMtl = pMdl->get_material(pBat->mMtlId);
-	if (!pMtl) return;
 
 	GPUProgram* pProg = nullptr;
 	GLsizei stride = 0;
@@ -103,6 +101,19 @@ static void batch_impl(cxModelWork* pWk, const int ibat, const Draw::Mode mode, 
 
 	pProg->draw_triangles(pBat->mTriNum, pBat->mIdxOrg);
 	pProg->disable_vertex_inputs();
+}
+	</code>
+
+	<br><br><br>
+	<a href="https://github.com/schaban/draw-walkthrough/blob/main/src/shaders/batch.frag">batch.frag</a>
+	<code>
+varying vec4 pix_clr;
+
+void main() {
+	vec4 c = pix_clr;
+	c.rgb = max(c.rgb, 0.0);
+	c.rgb = sqrt(c.rgb);
+	gl_FragColor = c;
 }
 	</code>
 
