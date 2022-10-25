@@ -1,4 +1,4 @@
-![draw-walkthrough](https://schaban.github.io/pic/dw_bnr.jpg)
+![draw-walkthrough](https://schaban.github.io/pic/dw_bnr_s.jpg)
 
 [crosscore](https://github.com/schaban/crosscore_dev) library comes with a set of example modules that implement scene management and rendering.
 
