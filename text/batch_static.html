@@ -112,6 +112,7 @@ varying vec4 pix_clr;
 void main() {
 	vec4 c = pix_clr;
 	c.rgb = max(c.rgb, 0.0);
+	c.rgb *= 0.7;
 	c.rgb = sqrt(c.rgb);
 	gl_FragColor = c;
 }
