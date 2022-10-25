@@ -1,3 +1,5 @@
+![draw-walkthrough](https://schaban.github.io/pic/dw_bnr.jpg)
+
 [crosscore](https://github.com/schaban/crosscore_dev) library comes with a set of example modules that implement scene management and rendering.
 
 How actual rendering of scene parts works is abstracted away by the use of generic draw-interface declared in [draw.hpp](https://github.com/schaban/crosscore_dev/blob/main/src/draw.hpp).
