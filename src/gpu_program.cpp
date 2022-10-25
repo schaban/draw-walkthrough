@@ -114,6 +114,17 @@ void GPUProgram::set_transforms(const char* pName, const xt_xmtx* pXforms, const
 	}
 }
 
+void GPUProgram::set_transform_matrices(const char* pName, const xt_xmtx* pXforms, const size_t nxforms) {
+	if (is_valid() && pName && pXforms && nxforms > 0) {
+		if (nxforms < XD_ARY_LEN(mMtxBuf)) {
+			for (size_t i = 0; i < nxforms; ++i) {
+				mMtxBuf[i] = nxMtx::mtx_from_xmtx(pXforms[i]);
+			}
+			set_gl_m(pName, (const float*)mMtxBuf, nxforms);
+		}
+	}
+}
+
 void GPUProgram::enable_vertex_float(const char* pName, const size_t stride, const size_t offs) {
 	enable_gl_vertex_input(pName, 1, stride, offs);
 }
