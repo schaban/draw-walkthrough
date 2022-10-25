@@ -46,6 +46,7 @@ static void create_vertex_buffer(sxModelData* pMdl) {
 				if (pVtxSkin) {
 					sxModelData::PntSkin pntSkin = pMdl->get_pnt_skin(i);
 					pVtxSkin->wgt.fill(0.0f);
+					pVtxSkin->idx.fill(0.0f);
 					for (int j = 0; j < pntSkin.num; ++j) {
 						pVtxSkin->wgt.set_at(j, pntSkin.wgt[j]);
 						pVtxSkin->idx.set_at(j, pntSkin.idx[j]);
