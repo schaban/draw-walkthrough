@@ -61,10 +61,8 @@ static void batch_impl(cxModelWork* pWk, const int ibat, const Draw::Mode mode, 
 
 	GPUProgram* pProg = nullptr;
 	GLsizei stride = 0;
-	if (skinFlg) {
-		pProg = &s_progDeform;
-		stride = (GLsizei)(sizeof(GPUGeom) + sizeof(GPUSkin));
-	} else {
+	if (skinFlg) {<div style="background-color: #E8EEE8;">		pProg = &s_progDeform;
+		stride = (GLsizei)(sizeof(GPUGeom) + sizeof(GPUSkin));</div>	} else {
 		pProg = &s_progStatic;
 		stride = (GLsizei)sizeof(GPUGeom);
 	}
@@ -84,13 +82,11 @@ static void batch_impl(cxModelWork* pWk, const int ibat, const Draw::Mode mode, 
 	pProg->enable_vertex_vec3("vtx_pos", stride, vbOrg + offsetof(GPUGeom, pos));
 	pProg->enable_vertex_vec3("vtx_nrm", stride, vbOrg + offsetof(GPUGeom, nrm));
 	pProg->enable_vertex_vec2("vtx_tex", stride, vbOrg + offsetof(GPUGeom, tex));
-	pProg->enable_vertex_vec4("vtx_clr", stride, vbOrg + offsetof(GPUGeom, clr));
-	if (skinFlg) {
+	pProg->enable_vertex_vec4("vtx_clr", stride, vbOrg + offsetof(GPUGeom, clr));<div style="background-color: #E8EEE8;">	if (skinFlg) {
 		size_t skOrg = vbOrg + sizeof(GPUGeom);
 		pProg->enable_vertex_vec4("vtx_wgt", stride, skOrg + offsetof(GPUSkin, wgt));
 		pProg->enable_vertex_int4("vtx_idx", stride, skOrg + offsetof(GPUSkin, idx));
-	}
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+	}</div>	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 
 	/* set rendering options */
 	glEnable(GL_CULL_FACE);
@@ -103,11 +99,9 @@ static void batch_impl(cxModelWork* pWk, const int ibat, const Draw::Mode mode, 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
-	/* set parameters */
-	if (skinFlg) {
+	/* set parameters */<div style="background-color: #E8EEE8;">	if (skinFlg) {
 		pProg->set_transform_matrices("prm_xforms", pWk->mpSkinXforms, pMdl->mSknNum);
-	}
-	pProg->set_matrix("prm_viewproj", pCtx->view.mViewProjMtx);
+	}</div>	pProg->set_matrix("prm_viewproj", pCtx->view.mViewProjMtx);
 
 	pProg->draw_triangles(pBat->mTriNum, pBat->mIdxOrg);
 	pProg->disable_vertex_inputs();
