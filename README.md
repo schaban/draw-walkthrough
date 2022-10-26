@@ -7,3 +7,5 @@ That is, while there is a default OpenGL implementation in [draw_ogl.cpp](https:
 
 The purpose of this project is to walk through a very basic OpenGL implementation of the draw-interface, providing along the way a general idea of the low-level graphics programming details involved in a task like this.
 As such this can serve as a sort of tutorial for OpenGL programming, however a number of higher-level conceptual details like the workings of the graphics pipeline or mathematics of transformations will be only mentioned in passing, if at all.
+
+[**Start here.**](https://schaban.github.io/dwt/start.html)
