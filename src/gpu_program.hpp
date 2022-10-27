@@ -4,6 +4,7 @@ protected:
 
 	GLuint mId;
 	uint32_t mInputCnt;
+	uint32_t mFlags;
 	GLint mEnabledInputLocs[GPUPROG_MAX_VTX_INPUTS];
 
 	cxMtx mMtxBuf[256];

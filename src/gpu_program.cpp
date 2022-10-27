@@ -3,7 +3,11 @@
 
 #include "gpu_program.hpp"
 
-GPUProgram::GPUProgram() : mId(0) {
+enum GPUProgFlags {
+	GPUPROG_WIRE = 1
+};
+
+GPUProgram::GPUProgram() : mId(0), mFlags(0) {
 	clear_inputs();
 }
 
@@ -18,12 +22,16 @@ void GPUProgram::init(const GLuint sidVert, const GLuint sidFrag) {
 		glDetachShader(pid, sidFrag); 
 	}
 	mId = pid;
+	if (nxApp::get_bool_opt("wire", false)) {
+		mFlags |= GPUPROG_WIRE;
+	}
 }
 
 void GPUProgram::reset() {
 	if (is_valid()) {
 		glDeleteProgram(mId);
 		mId = 0;
+		mFlags = 0;
 	}
 }
 
@@ -166,7 +174,13 @@ void GPUProgram::draw_triangles(const size_t numTris, const size_t idxOrg, const
 		GLenum typ = idx32 ? GL_UNSIGNED_INT : GL_UNSIGNED_SHORT;
 		size_t siz = idx32 ? sizeof(uint32_t) : sizeof(uint16_t);
 		const void* org = reinterpret_cast<const void*>(idxOrg * siz);
-		glDrawElements(GL_TRIANGLES, cnt, typ, org);
+		if (mFlags & GPUPROG_WIRE) {
+			for (size_t i = 0; i < numTris; ++i) {
+				glDrawElements(GL_LINE_LOOP, 3, typ, XD_INCR_PTR(org, siz * 3 * i));
+			}
+		} else {
+			glDrawElements(GL_TRIANGLES, cnt, typ, org);
+		}
 	}
 }
 
