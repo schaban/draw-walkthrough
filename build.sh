@@ -72,6 +72,10 @@ if [ "$#" -gt 0 ]; then
 				printf " - ""$FMT_BOLD""$RUN_PATH""$FMT_OFF\n"
 				rm -f $RUN_PATH
 			fi
+			CMK_FILE="CMakeLists.txt"
+			if [ -f $CMK_FILE ]; then
+				rm -f $CMK_FILE
+			fi
 			exit 0
 		;;
 	esac
