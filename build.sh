@@ -77,9 +77,9 @@ if [ "$#" -gt 0 ]; then
 	esac
 fi
 
-printf "$FMT_MAGENTA$FMT_BOLD""*------------------------------------------* ""$FMT_OFF\n"
-printf " ""$FMT_BLUE_BG$FMT_B_YELLOW"" .: Compiling draw-walkthrough project :. ""$FMT_OFF\n"
-printf "$FMT_MAGENTA$FMT_BOLD""*------------------------------------------* ""$FMT_OFF\n"
+printf "$FMT_MAGENTA$FMT_BOLD""*-----------------------------------------* ""$FMT_OFF\n"
+printf " ""$FMT_BLUE_BG$FMT_B_YELLOW"" .: Building draw-walkthrough project :. ""$FMT_OFF\n"
+printf "$FMT_MAGENTA$FMT_BOLD""*-----------------------------------------* ""$FMT_OFF\n"
 
 if [ ! -d $PROG_DIR ]; then
 	mkdir -p $PROG_DIR
@@ -233,6 +233,41 @@ case $SYS_NAME in
 	;;
 esac
 CXX=${CXX:-$DEF_CXX}
+
+if [ "$#" -gt 0 ]; then
+	case $1 in
+		srcs)
+			shift
+			SRCS_OUT=
+			printf "$FMT_GREEN""-> Dumping sources list...""$FMT_OFF\n"
+			if [ "$#" -gt 0 ]; then
+				SRCS_OUT=$1
+				shift
+			fi
+			SCRCS_FLG=0
+			if [ "$#" -gt 0 ]; then
+				if [ "$1" = "append" ]; then
+					SCRCS_FLG=1
+				fi
+				shift
+			fi
+			for src in $SRCS; do
+				if [ -n "$SRCS_OUT" ]; then
+					if [ $SCRCS_FLG -ne 0 ]; then
+						echo $src >> $SRCS_OUT
+					else
+						echo $src > $SRCS_OUT
+					fi
+				else
+					echo $src
+				fi
+				SCRCS_FLG=1
+			done
+			printf "Done.\n"
+			exit 0
+		;;
+	esac
+fi
 
 printf "Compiling \"$FMT_BOLD$FMT_B_MAGENTA$PROG_PATH$FMT_OFF\" with $FMT_BOLD$CXX$FMT_OFF.\n"
 rm -f $PROG_PATH
