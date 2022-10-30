@@ -97,9 +97,40 @@
 	</table>
 
 	<br>
-	<div class="todo"><b>TODO</b>: !! Expand on the above !!</div>
+	<table><tr>
+		<td>
+			Regardless of what types of primitives<br>
+			were used for modeling, the most common<br>
+			representation for real-time rendering is a<br>
+			set of points and how these points are<br>
+			connected into triangles.<br>
+			Points in this context are called <b>vertices</b><br>
+			and connections are stored as <b>indices</b>.<br>
+			<br>
+			An animated character model is controlled<br>
+			by a skeleton, a hierarchy of <b>joints</b>.<br>
+			Additional <b>attributes</b> can be assigned<br>
+			to vertices.<br>
+			E.g. for a model animated by joints,<br>
+			which joints and with what weight influence<br>
+			a vertex is the type of information stored<br>
+			in this manner.<br>
+			<br>
+			Additionaly, the whole list of triangles<br>
+			comprising a model, can be split into<br>
+			groups, called <b>batches</b>, based for example<br>
+			on textures assigned to different parts.<br>
+		</td>
+		<td>
+			<div class="manicule">&nbsp;&#x261E;</div>
+			<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+		</td>
+		<td>
+			<a href="pic/chr_topo.jpg"><img src="pic/chr_topo.jpg" width="50%"></a>
+		</td>
+	</tr></table>
 
-	<br><br>
+	<br><br><br><br>
 
 	<table>
 	<tr>
@@ -145,7 +176,7 @@
 		where each letter's shape represented as a set of triangles.<br>
 		That is, each such shape is similar to a batch in model data.
 		Complete message is diplayed by drawing its letters one by one.
-		<br><br><br>
+		<br><br><br><br>
 	</td>
 	<td>
 		<div class="manicule">&nbsp;&#x261E;</div>
@@ -159,10 +190,12 @@
 	</table>
 
 	<br><br><br>
-	
-	<br>
-	<div class="todo"><b>TODO</b>: !! Explain drawing mechanism, ref. Draw::Ifc, [batch, symbol] calls !!</div>
 
+	<br>
+
+	Rendering in this example is abstracted from a particular graphics API with the interface
+	shown below,<br>
+	declared in
 	<a href="https://github.com/schaban/crosscore_dev/blob/main/src/draw.hpp">draw.hpp</a>:<br>
 	<code>
 struct Ifc {
@@ -188,7 +221,35 @@ struct Ifc {
 	void (*<b>symbol</b>)(const Symbol* pSym);
 };
 	</code>
-	</td></tr></table>
+
+	<br>
+	This document walks through a very basic implementation using OpenGL.<br>
+	Initial code is in
+	<a href="https://github.com/schaban/crosscore_dev/blob/main/src/draw_simple_ogl.cpp">draw_simple_ogl.cpp</a><br>
+	The two highlighted calls in the above interface are what's necessary<br>
+	to implement to display the sample scene:<br>
+	<b>symbol</b> to draw the text, <b>batch</b> to render both types of models.<br>
+	<br>
+	<br>
+
+	<table><tr>
+	<td>
+		<code style="width: 102%">./run.sh -draw:simple_ogl</code>
+		<br><br><br>
+	</td>
+	<td class="manicule">
+		&nbsp;&nbsp;&nbsp;&#x261C;&nbsp;
+		<br><br><br>
+	</td>
+	<td>
+		Launching the sample program like this<br>
+		will select draw-interface implementation<br>
+		from draw_simple_ogl.cpp.
+		<br><br><br>
+	</td>
+	</tr></table>
+
+	</td></tr></table><!-- main_text -->
 </body>
 
 </html>
