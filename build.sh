@@ -61,7 +61,7 @@ if [ "$#" -gt 0 ]; then
 	case $1 in
 		clean)
 			printf "$FMT_RED$FMT_BOLD""Removing temporary files!""$FMT_OFF\n"
-			for tdir in core inc prog tmp; do
+			for tdir in core inc prog tmp $SHADERS_TGT_DIR; do
 				if [ -d $tdir ]; then
 					printf " * ""$FMT_BOLD""$tdir""$FMT_OFF\n"
 					rm -rf $tdir/*
