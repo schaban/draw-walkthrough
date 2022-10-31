@@ -18,6 +18,9 @@
 	<div style="font-size: 90%"><b style="font-family: monospace; font-weight: normal; font-size: 120%">Ifc::symbol</b> implementation&nbsp;&nbsp;|&nbsp;&nbsp;<a href="overview.html"/>&lt;&lt;</a>&nbsp;&nbsp;<a href="start.html"/>Home</a>&nbsp;&nbsp;<a href="batch_static.html"/>&gt;&gt;</a></div>
 	<hr><br>
 
+	To display symbols it's first necessary to convert their internal representation into the form
+	suitable for OpenGL.
+
 	<table  style="width:75%"><tr>
 	<td>
 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="pic/sym_geo.jpg"><img src="pic/sym_geo.jpg" width="75%"></a>
@@ -30,26 +33,21 @@
 	<td>
 		<br>
 		<b>Geometry Buffers</b>:<br>
-		Vertex Buffer (VB) stores point positions,<br>
-		Index Buffer (IB) stores triples of VB indices
+		Vertex Buffer (<b style="font-family: monospace;">VB</b>) stores point positions,<br>
+		Index Buffer (<b style="font-family: monospace;">IB</b>) stores triples of VB indices
 		that define triangles.
 		<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 	</td>
 	</tr></table>
 	<br>
 
-
-	<div class="todo"><b>TODO</b>: !! VB -> ARRAY_BUFFER, IB -> ELEMENT_ARRAY_BUFFER, GL calls !!</div>
-	<a href="https://registry.khronos.org/OpenGL-Refpages/gl4/html/glGenBuffers.xhtml">glGenBuffers</a>
 	<br>
-	<a href="https://registry.khronos.org/OpenGL-Refpages/gl4/html/glBindBuffer.xhtml">glBindBuffer</a>
-	<br>
-	<a href="https://registry.khronos.org/OpenGL-Refpages/gl4/html/glBufferData.xhtml">glBufferData</a>
 
-	<br><br><br>
-
+	This conversion is performed once on startup, when Draw::Ifc implementation is initialized.<br>
+	init_font() function in
 	<a href="https://github.com/schaban/draw-walkthrough/blob/main/src/draw_simple_ogl.cpp">draw_simple_ogl.cpp</a>
-
+	is intended to perform this task.<br>
+	The function is currently empty and can be implemented like this:
 	<code>
 static void init_font() {
 	Draw::Font* pFont = s_pFont;
@@ -73,6 +71,40 @@ static void init_font() {
 	}
 }
 	</code>
+	<br>
+	The entire set of symbol shapes is represented by Draw::Font structure.<br>
+	When init_font() is called, the pointer to this data is already assigned to static variable s_pFont.<br>
+	Font vertices are stored as pairs of floating-point (x, y) coordinates, represented by xt_float2 type.<br>
+	Triangles stored as an array of uint16_t indices.<br>
+	Overall Draw::Font structure is this:
+	<code style="width: 50%">
+	// needed for initalization
+	pPnts -> vertex coordinates
+	numPnts: how many vertices
+	pTris -> triangles
+	numTris: how many triagles
+	// needed for drawing
+	pSyms -> info about individual symbols
+	</code>
+
+	<br>
+	Working with a buffer in OpenGL starts with assigning a handle (also known as "name") to it.<br>
+	This is done with a call to
+	<a href="https://registry.khronos.org/OpenGL-Refpages/gl4/html/glGenBuffers.xhtml">glGenBuffers</a>.
+	Ths function can assign several handles at once,<br>
+	for simplicity this implementation uses separate calls
+	for <b style="font-family: monospace;">VB</b>
+	(stored in s_fontVBO) and <b style="font-family: monospace;">IB</b> (s_fontIBO).<br>
+	Such named entities are commonly known as Buffer Objects,
+	hence VBO for VB, IBO for IB.
+	<br>
+
+	<br>
+
+	<div class="todo"><b>TODO</b>: !! VB -> ARRAY_BUFFER, IB -> ELEMENT_ARRAY_BUFFER !!</div>
+	<a href="https://registry.khronos.org/OpenGL-Refpages/gl4/html/glBindBuffer.xhtml">glBindBuffer</a>
+	<br>
+	<a href="https://registry.khronos.org/OpenGL-Refpages/gl4/html/glBufferData.xhtml">glBufferData</a>
 	<div class="todo"><b>TODO</b>: !! Explain STATIC_DRAW !!</div>
 
 	<br><br>
