@@ -14,6 +14,8 @@ TMP_DIR=tmp
 SHADERS_SRC_DIR=$SRC_DIR/shaders
 SHADERS_TGT_DIR=$DATA_DIR/simple_ogl
 
+WEB_TMP_DIR=tmp/web
+
 PROG_PATH=$PROG_DIR/$PROG_NAME
 RUN_PATH=run.sh
 
@@ -57,6 +59,9 @@ FMT_B_WHITE=${NO_FMT-"\e[97m"}
 FMT_B_WHITE_BG=${NO_FMT-"\e[107m"}
 FMT_OFF=${NO_FMT-"\e[0m"}
 
+WEB_CXX=""
+WEB_BUILD=0
+
 if [ "$#" -gt 0 ]; then
 	case $1 in
 		clean)
@@ -78,12 +83,26 @@ if [ "$#" -gt 0 ]; then
 			fi
 			exit 0
 		;;
+		web)
+			WEB_BUILD=1
+			if [ -n "$EMSDK" ]; then
+				shift
+				WEB_CXX="em++"
+			fi
+		;;
 	esac
 fi
 
 printf "$FMT_MAGENTA$FMT_BOLD""*-----------------------------------------* ""$FMT_OFF\n"
 printf " ""$FMT_BLUE_BG$FMT_B_YELLOW"" .: Building draw-walkthrough project :. ""$FMT_OFF\n"
 printf "$FMT_MAGENTA$FMT_BOLD""*-----------------------------------------* ""$FMT_OFF\n"
+
+if [ $WEB_BUILD -ne 0 ]; then
+	if [ -z "$WEB_CXX" ]; then
+		printf "$FMT_RED$FMT_BOLD""web-build: can't find emscripten""$FMT_OFF\n"
+		exit 1
+	fi
+fi
 
 if [ ! -d $PROG_DIR ]; then
 	mkdir -p $PROG_DIR
@@ -170,11 +189,13 @@ if [ $NEED_CORE -ne 0 ]; then
 fi
 
 NEED_OGL_INC=0
-case $SYS_NAME in
-	Linux)
-		NEED_OGL_INC=1
-	;;
-esac
+if [ $WEB_BUILD -eq 0 ]; then
+	case $SYS_NAME in
+		Linux)
+			NEED_OGL_INC=1
+		;;
+	esac
+fi
 
 if [ $NEED_OGL_INC -ne 0 ]; then
 	KHR_REG_URL=https://registry.khronos.org
@@ -273,6 +294,28 @@ if [ "$#" -gt 0 ]; then
 	esac
 fi
 
+if [ ! -d $SHADERS_TGT_DIR ]; then
+	mkdir -p $SHADERS_TGT_DIR
+fi
+printf "$FMT_OFF""Copying GLSL code:\n""$FMT_GRAY"
+for glsl in `ls $SHADERS_SRC_DIR`; do
+	cp -v $SHADERS_SRC_DIR/$glsl $SHADERS_TGT_DIR/$glsl
+done
+printf "$FMT_OFF""Done!\n"
+
+if [ $WEB_BUILD -ne 0 ]; then
+	if [ ! -d $WEB_TMP_DIR ]; then
+		mkdir -p $WEB_TMP_DIR
+	fi
+	MKROM_SRC="$WEB_TMP_DIR/mkrom.cpp"
+	if [ ! -f $MKROM_SRC ]; then
+		printf "$FMT_B_BLUE""Downloading mkrom...""$FMT_OFF\n"
+		$DL_CMD $MKROM_SRC $CORE_SRC_URL/etc/rom/mkrom.cpp
+	fi
+	printf "$FMT_B_RED""web-build: TODO""$FMT_OFF\n"
+	exit 1
+fi
+
 printf "Compiling \"$FMT_BOLD$FMT_B_MAGENTA$PROG_PATH$FMT_OFF\" with $FMT_BOLD$CXX$FMT_OFF.\n"
 rm -f $PROG_PATH
 rm -f $RUN_PATH
@@ -290,16 +333,10 @@ if [ "$SYS_NAME" = "Darwin" ]; then
 	SRCS="$SRCS $MAC_MAIN_OBJ"
 	INCS="$INCS -I $CORE_DIR/mac"
 fi
+
 $CXX -std=c++11 -ggdb $DEFS $INCS $SRCS -o $PROG_PATH $LIBS $*
+
 if [ -f "$PROG_PATH" ]; then
-	if [ ! -d $SHADERS_TGT_DIR ]; then
-		mkdir -p $SHADERS_TGT_DIR
-	fi
-	printf "$FMT_OFF""Copying GLSL code:\n""$FMT_GRAY"
-	for glsl in symbol.vert symbol.frag batch_static.vert batch_deform.vert batch.frag; do
-		cp -v $SHADERS_SRC_DIR/$glsl $SHADERS_TGT_DIR/$glsl
-	done
-	printf "$FMT_OFF""Done!\n"
 	printf "#!/bin/sh\n\n" > $RUN_PATH
 	printf "./$PROG_PATH -nwrk:0 \$*\n" >> $RUN_PATH
 	chmod +x $RUN_PATH
