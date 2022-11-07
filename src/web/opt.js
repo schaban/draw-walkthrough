@@ -10,6 +10,10 @@ Module.arguments = [
 	"-glsl_echo:1"
 ];
 
+if (pageParams.get("simple_ogl") !== null) {
+	Module.arguments.push("-draw:simple_ogl");
+}
+
 if (pageParams.get("small") !== null) {
 	Module.arguments.push("-w:480");
 	Module.arguments.push("-h:320");
