@@ -212,6 +212,8 @@ GLuint load(cxResourceManager* pRsrcMgr, const char* pName, const char* pShaders
 				const char* pPrologue = nullptr;
 				if (OGLSys::is_es()) {
 					pPrologue = "precision highp float;\n";
+				} else if (OGLSys::is_web()) {
+					pPrologue = "#version 100\nprecision highp float;\n#define WEBGL\n";
 				} else {
 					pPrologue = "#version 150\n";
 				}
