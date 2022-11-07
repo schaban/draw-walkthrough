@@ -1,7 +1,9 @@
 #!/bin/sh
 
 PROG_NAME=draw_prog
+BUILD_DATE="$(date)"
 SYS_NAME="`uname -s`"
+BUILD_PATH=$PWD
 
 PROG_DIR=prog
 CORE_DIR=core
@@ -304,16 +306,44 @@ done
 printf "$FMT_OFF""Done!\n"
 
 if [ $WEB_BUILD -ne 0 ]; then
-	if [ ! -d $WEB_TMP_DIR ]; then
+	PROG_HTML=$PROG_PATH.html
+	if [ ! -d "$WEB_TMP_DIR" ]; then
 		mkdir -p $WEB_TMP_DIR
 	fi
+	XROM_PATH="$BUILD_PATH/$WEB_TMP_DIR/xrom.cpp"
 	MKROM_SRC="$WEB_TMP_DIR/mkrom.cpp"
-	if [ ! -f $MKROM_SRC ]; then
+	if [ ! -f "$MKROM_SRC" ]; then
 		printf "$FMT_B_BLUE""Downloading mkrom...""$FMT_OFF\n"
 		$DL_CMD $MKROM_SRC $CORE_SRC_URL/etc/rom/mkrom.cpp
 	fi
-	printf "$FMT_B_RED""web-build: TODO""$FMT_OFF\n"
-	exit 1
+	MKROM_EXE="$BUILD_PATH/$WEB_TMP_DIR/mkrom"
+	if [ ! -f "$MKROM_EXE" ]; then
+		printf "$FMT_B_BLUE""Compiling mkrom...""$FMT_OFF\n"
+		MKROM_CXX_FLGS="-O2 -flto -pthread -I $CORE_DIR"
+		MKROM_CXX_SRCS="$CORE_DIR/crosscore.cpp $MKROM_SRC"
+		$CXX $MKROM_CXX_FLGS $MKROM_CXX_SRCS -o $MKROM_EXE
+	fi
+	printf "Making ROM file:\n"
+	cd $DATA_DIR
+	ls -1d */* | $MKROM_EXE -nobin:1 -txt:$XROM_PATH
+	cd $BUILD_PATH
+	WEB_OPTS="-std=c++11 -O3"
+	WEB_OPTS="$WEB_OPTS -s WASM=0 -s SINGLE_FILE"
+	WEB_OPTS="$WEB_OPTS -s SINGLE_FILE -s USE_SDL=2 -s ASSERTIONS=1"
+	WEB_OPTS="$WEB_OPTS -s INITIAL_MEMORY=50MB -s ALLOW_MEMORY_GROWTH=1"
+	WEB_OPTS="$WEB_OPTS -DXD_THREADFUNCS_ENABLED=0 -DXD_FILEFUNCS_ENABLED=0"
+	WEB_OPTS="$WEB_OPTS -DOGLSYS_WEB -DUSE_XROM_ARCHIVE"
+	printf "Compiling \"$FMT_BOLD$FMT_B_MAGENTA$PROG_HTML$FMT_OFF\" with $FMT_BOLD$WEB_CXX$FMT_OFF.\n"
+	$WEB_CXX $WEB_OPTS $INCS $SRCS $XROM_PATH --pre-js src/web/opt.js --shell-file src/web/shell.html -o $PROG_HTML -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap"]' -s EXPORTED_FUNCTIONS='["_main","_wi_set_key_state"]' $*
+	if [ -f "$PROG_HTML" ]; then
+		sed -i 's/antialias:!1/antialias:1/g' $PROG_HTML
+		DATE_EXPR="s/Build date:.../Build date: $BUILD_DATE | JS\/ROM ver./g"
+		sed -i "$DATE_EXPR" $PROG_HTML
+		printf "web-build: ""$FMT_B_GREEN""Success""$FMT_OFF""$FMT_BOLD""!!""$FMT_OFF\n"
+	else
+		printf "web-build: ""$FMT_B_RED""Failure""$FMT_OFF...\n"
+	fi
+	exit
 fi
 
 printf "Compiling \"$FMT_BOLD$FMT_B_MAGENTA$PROG_PATH$FMT_OFF\" with $FMT_BOLD$CXX$FMT_OFF.\n"
