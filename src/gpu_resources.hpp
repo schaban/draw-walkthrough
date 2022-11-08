@@ -7,7 +7,7 @@ struct GPUGeom {
 
 struct GPUSkin {
 	xt_float4 wgt;
-	xt_int4   idx;
+	xt_float4 idx;
 };
 
 namespace GPUModel {

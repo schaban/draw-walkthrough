@@ -49,7 +49,7 @@ static void create_vertex_buffer(sxModelData* pMdl) {
 					pVtxSkin->idx.fill(0.0f);
 					for (int j = 0; j < pntSkin.num; ++j) {
 						pVtxSkin->wgt.set_at(j, pntSkin.wgt[j]);
-						pVtxSkin->idx.set_at(j, pntSkin.idx[j]);
+						pVtxSkin->idx.set_at(j, float(pntSkin.idx[j]));
 					}
 					pVtxSkin = reinterpret_cast<GPUSkin*>(XD_INCR_PTR(pVtxSkin, vtxSize));
 				}

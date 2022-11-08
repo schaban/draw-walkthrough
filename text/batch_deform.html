@@ -87,7 +87,7 @@ static void batch_impl(cxModelWork* pWk, const int ibat, const Draw::Mode mode, 
 	pProg->enable_vertex_vec4("vtx_clr", stride, vbOrg + offsetof(GPUGeom, clr));<div style="background-color: #E8EEE8;">	if (skinFlg) {
 		size_t skOrg = vbOrg + sizeof(GPUGeom);
 		pProg->enable_vertex_vec4("vtx_wgt", stride, skOrg + offsetof(GPUSkin, wgt));
-		pProg->enable_vertex_int4("vtx_idx", stride, skOrg + offsetof(GPUSkin, idx));
+		pProg->enable_vertex_vec4("vtx_idx", stride, skOrg + offsetof(GPUSkin, idx));
 	}</div>	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 
 	/* set rendering options */
