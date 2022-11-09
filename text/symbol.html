@@ -98,16 +98,18 @@ static void init_font() {
 	Such named entities are commonly known as Buffer Objects,
 	hence VBO for VB, IBO for IB.
 	<br>
-
 	<br>
-
-	<div class="todo"><b>TODO</b>: !! VB -> ARRAY_BUFFER, IB -> ELEMENT_ARRAY_BUFFER !!</div>
-	<a href="https://registry.khronos.org/OpenGL-Refpages/gl4/html/glBindBuffer.xhtml">glBindBuffer</a>
-	<br>
+	To populate a buffer with data, it must first be activated at a particular binding point,<br>
+	by calling <a href="https://registry.khronos.org/OpenGL-Refpages/gl4/html/glBindBuffer.xhtml">glBindBuffer</a>.<br>
+	For VB the binding point is GL_ARRAY_BUFFER, GL_ELEMENT_ARRAY_BUFFER for IB.<br>
 	<a href="https://registry.khronos.org/OpenGL-Refpages/gl4/html/glBufferData.xhtml">glBufferData</a>
-	<div class="todo"><b>TODO</b>: !! Explain STATIC_DRAW !!</div>
+	is then used to thransfer font geometry to GL-accessible memory.<br>
+	GL_STATIC_DRAW specifies here that this data will be created once and then used<br>
+	without modifications.<br>
+
 
 	<br><br>
+	<div class="todo"><b>TODO</b>: !! -> VS !!</div>
 	<a href="https://github.com/schaban/draw-walkthrough/blob/main/src/shaders/symbol.vert">symbol.vert</a>
 	<code>
 attribute vec2 vtx_pos;
