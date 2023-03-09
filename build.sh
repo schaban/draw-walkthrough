@@ -28,7 +28,7 @@ fi
 FMT_BOLD=${NO_FMT-"\e[1m"}
 FMT_UNDER=${NO_FMT-"\e[4m"}
 FMT_BLACK=${NO_FMT-"\e[30m"}
-FMT_BLACK_BG=${NO_FMT-"\e[30m"}
+FMT_BLACK_BG=${NO_FMT-"\e[40m"}
 FMT_RED=${NO_FMT-"\e[31m"}
 FMT_RED_BG=${NO_FMT-"\e[41m"}
 FMT_GREEN=${NO_FMT-"\e[32m"}
@@ -301,7 +301,8 @@ if [ ! -d $SHADERS_TGT_DIR ]; then
 fi
 printf "$FMT_OFF""Copying GLSL code:\n""$FMT_GRAY"
 for glsl in `ls $SHADERS_SRC_DIR`; do
-	cp -v $SHADERS_SRC_DIR/$glsl $SHADERS_TGT_DIR/$glsl
+	printf "* $glsl\n"
+	cp $SHADERS_SRC_DIR/$glsl $SHADERS_TGT_DIR/$glsl
 done
 printf "$FMT_OFF""Done!\n"
 
