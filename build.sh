@@ -193,7 +193,7 @@ fi
 NEED_OGL_INC=0
 if [ $WEB_BUILD -eq 0 ]; then
 	case $SYS_NAME in
-		Linux)
+		Linux | SunOS)
 			NEED_OGL_INC=1
 		;;
 	esac
