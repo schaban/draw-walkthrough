@@ -16,7 +16,7 @@ TMP_DIR=tmp
 SHADERS_SRC_DIR=$SRC_DIR/shaders
 SHADERS_TGT_DIR=$DATA_DIR/simple_ogl
 
-WEB_TMP_DIR=tmp/web
+ROM_TMP_DIR=tmp/rom
 
 PROG_PATH=$PROG_DIR/$PROG_NAME
 RUN_PATH=run.sh
@@ -64,6 +64,7 @@ FMT_OFF=${NO_FMT-"\e[0m"}
 WEB_CXX=""
 WEB_BUILD=0
 WEB_WASM=0
+USE_ROM=0
 
 if [ "$#" -gt 0 ]; then
 	case $1 in
@@ -88,6 +89,7 @@ if [ "$#" -gt 0 ]; then
 		;;
 		web)
 			WEB_BUILD=1
+			USE_ROM=1
 			if [ -n "$EMSDK" ]; then
 				shift
 				WEB_CXX="em++"
@@ -96,6 +98,10 @@ if [ "$#" -gt 0 ]; then
 					shift
 				fi
 			fi
+		;;
+		rom)
+			USE_ROM=1
+			shift
 		;;
 	esac
 fi
@@ -240,8 +246,8 @@ fi
 INCS="-I $CORE_DIR -I $INC_DIR "
 SRCS="`ls $SRC_DIR/*.cpp` `ls $CORE_DIR/*.cpp`"
 
-DEFS="-DX11"
-LIBS="-lX11"
+DEFS=${ALT_DEFS-"-DX11"}
+LIBS=${ALT_LIBS-"-lX11"}
 
 DEF_CXX="g++"
 case $SYS_NAME in
@@ -311,18 +317,19 @@ for glsl in `ls $SHADERS_SRC_DIR`; do
 done
 printf "$FMT_OFF""Done!\n"
 
-if [ $WEB_BUILD -ne 0 ]; then
-	PROG_HTML=$PROG_PATH.html
-	if [ ! -d "$WEB_TMP_DIR" ]; then
-		mkdir -p $WEB_TMP_DIR
+XROM_PATH=""
+XROM_DEFS=""
+if [ $USE_ROM -ne 0 ]; then
+	if [ ! -d "$ROM_TMP_DIR" ]; then
+		mkdir -p $ROM_TMP_DIR
 	fi
-	XROM_PATH="$BUILD_PATH/$WEB_TMP_DIR/xrom.cpp"
-	MKROM_SRC="$WEB_TMP_DIR/mkrom.cpp"
+	XROM_PATH="$BUILD_PATH/$ROM_TMP_DIR/xrom.cpp"
+	MKROM_SRC="$ROM_TMP_DIR/mkrom.cpp"
 	if [ ! -f "$MKROM_SRC" ]; then
 		printf "$FMT_B_BLUE""Downloading mkrom...""$FMT_OFF\n"
 		$DL_CMD $MKROM_SRC $CORE_SRC_URL/etc/rom/mkrom.cpp
 	fi
-	MKROM_EXE="$BUILD_PATH/$WEB_TMP_DIR/mkrom"
+	MKROM_EXE="$BUILD_PATH/$ROM_TMP_DIR/mkrom"
 	if [ ! -f "$MKROM_EXE" ]; then
 		printf "$FMT_B_BLUE""Compiling mkrom...""$FMT_OFF\n"
 		MKROM_CXX_FLGS="-O2 -flto -pthread -I $CORE_DIR"
@@ -333,14 +340,19 @@ if [ $WEB_BUILD -ne 0 ]; then
 	cd $DATA_DIR
 	ls -1d */* | $MKROM_EXE -nobin:1 -txt:$XROM_PATH
 	cd $BUILD_PATH
+	XROM_DEFS="-DUSE_XROM_ARCHIVE"
+fi
+
+if [ $WEB_BUILD -ne 0 ]; then
+	PROG_HTML=$PROG_PATH.html
 	WEB_OPTS="-std=c++11 -O3"
 	WEB_OPTS="$WEB_OPTS -s WASM=$WEB_WASM -s SINGLE_FILE"
 	WEB_OPTS="$WEB_OPTS -s SINGLE_FILE -s USE_SDL=2 -s ASSERTIONS=1"
 	WEB_OPTS="$WEB_OPTS -s INITIAL_MEMORY=50MB -s ALLOW_MEMORY_GROWTH=1"
 	WEB_OPTS="$WEB_OPTS -DXD_THREADFUNCS_ENABLED=0 -DXD_FILEFUNCS_ENABLED=0"
-	WEB_OPTS="$WEB_OPTS -DOGLSYS_WEB -DUSE_XROM_ARCHIVE"
+	WEB_OPTS="$WEB_OPTS -DOGLSYS_WEB"
 	printf "Compiling \"$FMT_BOLD$FMT_B_MAGENTA$PROG_HTML$FMT_OFF\" with $FMT_BOLD$WEB_CXX$FMT_OFF.\n"
-	$WEB_CXX $WEB_OPTS $INCS $SRCS $XROM_PATH --pre-js src/web/opt.js --shell-file src/web/shell.html -o $PROG_HTML -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap"]' -s EXPORTED_FUNCTIONS='["_main","_wi_set_key_state"]' $*
+	$WEB_CXX $WEB_OPTS $XROM_DEFS $INCS $SRCS $XROM_PATH --pre-js src/web/opt.js --shell-file src/web/shell.html -o $PROG_HTML -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap"]' -s EXPORTED_FUNCTIONS='["_main","_wi_set_key_state"]' $*
 	if [ -f "$PROG_HTML" ]; then
 		WEB_TGT="JS"
 		if [ $WEB_WASM -ne 0 ]; then
@@ -374,7 +386,7 @@ if [ "$SYS_NAME" = "Darwin" ]; then
 	INCS="$INCS -I $CORE_DIR/mac"
 fi
 
-$CXX -std=c++11 -ggdb $DEFS $INCS $SRCS -o $PROG_PATH $LIBS $*
+$CXX -std=c++11 -ggdb $XROM_DEFS $DEFS $INCS $SRCS $XROM_PATH -o $PROG_PATH $LIBS $*
 
 if [ -f "$PROG_PATH" ]; then
 	printf "#!/bin/sh\n\n" > $RUN_PATH
