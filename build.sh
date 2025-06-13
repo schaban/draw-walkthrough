@@ -266,6 +266,10 @@ case $SYS_NAME in
 		LIBS="-framework Foundation -framework Cocoa -framework OpenGL -Xlinker -w"
 		DEF_CXX="clang++"
 	;;
+	CYGWIN*)
+		DEFS=""
+		LIBS="-lgdi32"
+	;;
 	Linux)
 		LIBS="$LIBS -ldl -lpthread"
 	;;
